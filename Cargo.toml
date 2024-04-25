@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "faucet",
+    "ft_token",
+    "nft",
+    "joy_v1",
+    "integration-tests"
+]
+
+[profile.release]
+codegen-units = 1
+# s = optimize for binary size ("z" would additionally turn off loop vectorization)
+opt-level = "z"
+# link time optimization
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true
