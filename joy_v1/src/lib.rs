@@ -45,6 +45,11 @@ impl JoychiV1 {
                     .try_to_vec()
                     .unwrap(),
             ),
+            pet_evolution_metadata_by_id: LookupMap::new(
+                JoychiV1StorageKey::PetEvolutionMetadataById
+                    .try_to_vec()
+                    .unwrap(),
+            ),
         }
     }
 }

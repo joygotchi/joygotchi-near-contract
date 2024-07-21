@@ -1,4 +1,3 @@
-
 use near_sdk::{
     env::{self},
     json_types::U128,
@@ -10,8 +9,8 @@ use crate::{
     models::{
         contract::{BattleMetadata, JoychiV1, JoychiV1Ext, Status},
         ft_request::external::cross_ft,
-        nft_request::external::{cross_nft, TokenMetadata, PetAttribute},
-        pet::{PetEvolution, PetFeature, PetMetadata, PetSpecies},
+        nft_request::external::{cross_nft, PetAttribute, TokenMetadata},
+        pet::{PetEnum, PetEvolution, PetFeature, PetMetadata, PetSpecies},
         ItemId, PetId,
     },
 };
@@ -32,12 +31,12 @@ impl PetFeature for JoychiV1 {
         self.manager_address = manager_addr;
     }
 
-
     fn token_uri(&mut self, pet_id: PetId) -> PetAttribute {
-
         let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
         let evol_phase_pet_now: usize = pet.pet_evolution_phase as usize;
-        let pet_img: String = pet.pet_evolution[evol_phase_pet_now - 1].image.clone();
+
+        let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
+        let pet_img: String = pet_evolution_by_id[evol_phase_pet_now - 1].image.clone();
 
         //assert!(self.check_role_update_pet(pet_id, env::signer_account_id()), "You're not permission");
 
@@ -47,34 +46,42 @@ impl PetFeature for JoychiV1 {
             score: pet.score,
             level: pet.level,
             status: pet.status,
-            star: pet.star
+            star: pet.star,
         };
 
-        cross_nft::ext(self.nft_address.to_owned()).with_static_gas(GAS_FOR_CROSS_CALL).update_medatada_pet(pet_id.to_string(), pet_attribute.clone());
+        cross_nft::ext(self.nft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .update_medatada_pet(pet_id.to_string(), pet_attribute.clone());
 
         return pet_attribute;
-
     }
 
-    fn delegate_update_attribute(&mut self, pet_id: PetId, pet_attribute: PetAttribute){
-
-        assert!(self.check_role_update_pet(pet_id, env::signer_account_id()), "You're not permission");
-        cross_nft::ext(self.nft_address.to_owned()).with_static_gas(GAS_FOR_CROSS_CALL).update_medatada_pet(pet_id.to_string(), pet_attribute);
-    
+    fn delegate_update_attribute(&mut self, pet_id: PetId, pet_attribute: PetAttribute) {
+        assert!(
+            self.check_role_update_pet(pet_id, env::signer_account_id()),
+            "You're not permission"
+        );
+        cross_nft::ext(self.nft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .update_medatada_pet(pet_id.to_string(), pet_attribute);
     }
 
-    fn delegate_update_metadata(&mut self, pet_id: PetId, token_metadata: TokenMetadata){
-
-        assert!(self.check_role_update_pet(pet_id, env::signer_account_id()), "You're not permission");
-        cross_nft::ext(self.nft_address.to_owned()).with_static_gas(GAS_FOR_CROSS_CALL).update_token_metadata(pet_id.to_string(), token_metadata);
-    
+    fn delegate_update_metadata(&mut self, pet_id: PetId, token_metadata: TokenMetadata) {
+        assert!(
+            self.check_role_update_pet(pet_id, env::signer_account_id()),
+            "You're not permission"
+        );
+        cross_nft::ext(self.nft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .update_token_metadata(pet_id.to_string(), token_metadata);
     }
 
     fn create_pet(&mut self, name: String) -> PetMetadata {
-
         let owner_id = env::signer_account_id();
 
         let num_pet_id: u64 = self.all_pet_id.len();
+
+        let pet_id = num_pet_id + 1;
 
         assert!(
             self.all_pet_species_id.len() > 0,
@@ -83,13 +90,13 @@ impl PetFeature for JoychiV1 {
 
         let pet_species_id = random_in_range(1, self.all_pet_species_id.len() as i64);
 
-        let pet_species = self
+        let mut pet_species = self
             .pet_species_metadata_by_id
             .get(&pet_species_id)
             .unwrap();
 
         let pet_metadata = PetMetadata {
-            pet_id: num_pet_id + 1,
+            pet_id: pet_id,
             name: name.clone(),
             owner_id: owner_id.clone(),
             time_pet_born: env::block_timestamp() as u128,
@@ -102,7 +109,6 @@ impl PetFeature for JoychiV1 {
             reward_debt: 0,
             pet_species: pet_species.species_id as u128,
             pet_shield: 0,
-            pet_evolution: pet_species.pet_volution,
             last_attack_used: 0,
             last_attacked: 0,
             pet_evolution_item_id: pet_species.evolution_item_id,
@@ -110,14 +116,16 @@ impl PetFeature for JoychiV1 {
             pet_has_evolution_item: true,
             pet_evolution_phase: 1,
             extra_permission: Vec::new(),
-            category: pet_species.species_name
+            category: pet_species.species_name,
         };
-
 
         let token_metadata = TokenMetadata {
             title: Some(name.clone()),
-            description: Some(format!("name:{}, image:{}, level:{}, score:{}, status:{:?}, star:{}", pet_metadata.name, pet_metadata.pet_evolution[0].image, 1, 0, pet_metadata.status, 0)),
-            media: Some(pet_metadata.pet_evolution[0].image.clone()),
+            description: Some(format!(
+                "name:{}, image:{}, level:{}, score:{}, status:{:?}, star:{}",
+                pet_metadata.name, pet_species.pet_evolution[0].image, 1, 0, pet_metadata.status, 0
+            )),
+            media: Some(pet_species.pet_evolution[0].image.clone()),
             media_hash: None,
             copies: None,
             issued_at: None,
@@ -126,17 +134,26 @@ impl PetFeature for JoychiV1 {
             updated_at: Some(env::block_timestamp()),
             extra: None,
             reference: None,
-            reference_hash: None
+            reference_hash: None,
         };
 
-        self.pet_metadata_by_id
-            .insert(&(num_pet_id + 1), &pet_metadata);
-        self.all_pet_id.insert(&(num_pet_id + 1));
+        self.pet_evolution_metadata_by_id
+            .insert(&pet_id, &pet_species.pet_evolution);
 
+        self.pet_metadata_by_id.insert(&pet_id, &pet_metadata);
+        self.all_pet_id.insert(&pet_id);
 
-        cross_nft::ext(self.nft_address.to_owned()).with_static_gas(GAS_FOR_CROSS_CALL).with_attached_deposit(ATTACHED_DEPOSIT_NFT).nft_mint((num_pet_id + 1).to_string(), token_metadata, owner_id.clone());
-        cross_ft::ext(self.ft_address.to_owned()).with_static_gas(GAS_FOR_CROSS_CALL).ft_burn(owner_id.clone(), BURN_AMOUNT);
-
+        cross_nft::ext(self.nft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .with_attached_deposit(ATTACHED_DEPOSIT_NFT)
+            .nft_mint(
+                (num_pet_id + 1).to_string(),
+                token_metadata,
+                owner_id.clone(),
+            );
+        cross_ft::ext(self.ft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .ft_burn(owner_id.clone(), BURN_AMOUNT);
 
         pet_metadata
     }
@@ -340,8 +357,11 @@ impl PetFeature for JoychiV1 {
         }
     }
 
-    fn add_access_update_pet(&mut self, pet_id: PetId, user_id: AccountId) -> PetMetadata { 
-        assert!(env::signer_account_id() == self.owner_id, "YOu are not owner");
+    fn add_access_update_pet(&mut self, pet_id: PetId, user_id: AccountId) -> PetMetadata {
+        assert!(
+            env::signer_account_id() == self.owner_id,
+            "YOu are not owner"
+        );
         let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
 
         pet.extra_permission.push(user_id);
@@ -369,7 +389,13 @@ impl PetFeature for JoychiV1 {
         false
     }
 
-    fn create_species(&mut self, need_evol_item: bool, evol_item_id: u128, name_spec: String, pet_evolution: Vec<PetEvolution>) {
+    fn create_species(
+        &mut self,
+        need_evol_item: bool,
+        evol_item_id: u128,
+        name_spec: String,
+        pet_evolution: Vec<PetEvolution>,
+    ) {
         assert!(self.owner_id == env::signer_account_id(), "Only owner");
 
         let num_pet_spec = self.all_pet_species_id.len() + 1;
@@ -379,13 +405,27 @@ impl PetFeature for JoychiV1 {
             species_name: name_spec,
             need_evolution_item: need_evol_item.clone(),
             evolution_item_id: evol_item_id,
-            pet_volution: pet_evolution.clone()
+            pet_evolution: pet_evolution.clone(),
         };
 
         self.all_pet_species_id.insert(&num_pet_spec);
         self.pet_species_metadata_by_id
             .insert(&num_pet_spec, &species);
     }
+
+    fn check_evol_pet_if_needed(&mut self, pet_id: PetId) {
+        let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
+        let current_phase = pet.pet_evolution_phase;
+
+        let next_evol_phase = self.get_pet_evolution_phase(pet_id, current_phase);
+
+        if (current_phase < next_evol_phase) {
+            pet.pet_evolution_phase = next_evol_phase;
+        }
+
+        self.pet_metadata_by_id.insert(&pet_id, &pet);
+    }
+
     #[payable]
     fn redeem(&mut self, pet_id: PetId, to_addr: AccountId) {
         let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
@@ -395,31 +435,5 @@ impl PetFeature for JoychiV1 {
         pet.reward_debt = 0;
 
         Promise::new(to_addr.clone()).transfer(1 / 10_000);
-    }
-
-    fn evolve(&mut self, pet_id: PetId) {
-        let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
-
-        let evol_phase_pet_now: usize = pet.pet_evolution_phase as usize;
-
-        let evol_level: u128 = pet.pet_evolution[evol_phase_pet_now - 1].next_evolution_level;
-        assert!(pet.owner_id == env::signer_account_id());
-
-        assert!(
-            pet.pet_evolution_phase < pet.pet_evolution.len() as u128 - 1,
-            "Max evolution phase reached"
-        );
-
-        assert!(self.level_pet(pet_id) >= evol_level, "Not enough level");
-
-        if pet.pet_need_evolution_item {
-            assert!(pet.pet_has_evolution_item, "You need the evolution item");
-        }
-
-        pet.pet_evolution_phase += 1;
-
-        // update metadata pet
-
-        self.pet_metadata_by_id.insert(&pet_id, &pet);
     }
 }

@@ -1,4 +1,5 @@
-# Contracts for testnet 
+# Contracts for testnet
+
 ```
 FT_CONTRACT = "token.joychi.testnet"
 NFT_CONTRACT = "nft.joychi.testnet"
@@ -10,19 +11,18 @@ GAME_CONTRACT = "game.joychi.testnet"
 
 ```bash
 export ECO=$(<./neardev/dev-account)
-export USER1=kaito021201.testnet \ jewel goose vibrant minimum exhaust feature crystal solar any toe hire novel
-export USER2=kaito021202.testnet \ vapor coast fossil call acquire sadness pole scare ahead jump dignity zebra
+export USER1=kaito021201.testnet
+export USER2=kaito021202.testnet
 ```
 
 ## Deploy Fungible Token
-
 
 ```bash
 cd ft_token
 cargo make clean
 cargo make build
 cargo make dev-deploy
- 
+
 cargo make call new_default_meta '{"owner_id": "'$USER1'", "total_supply": "100000000"}' --accountId $ECO
 
 cargo make call storage_deposit '{"account_id": "'$USER1'"}' --accountId $ECO --amount 0.0125
@@ -44,7 +44,6 @@ cargo make call init '{"ft_address": "'$FT_ADDRESS'"}'
 cargo make call get_joychi '{"'$ADDR_TO'"}' --accountId $ECO
 ```
 
-
 ## Deploy Non-Fungible Token
 
 ```bash
@@ -60,6 +59,7 @@ cargo make view nft_token '{"token_id": "1"}'
 ```
 
 ## Flow Joychi
+
 ```bash
 # Deploy FT contract -> get $FT_ADDRESS
 # Deploy NFT contract -> get $NFT_ADDRESS
@@ -89,7 +89,7 @@ cargo make call create_pet '{"name": "Joychi2"}' --accountId $USER2
 
 # change name pet by owner
 
-cargo make call change_name_pet '{"pet_id": 1, "name": "Joychi 2" }' --accountId $USER1 
+cargo make call change_name_pet '{"pet_id": 1, "name": "Joychi 2" }' --accountId $USER1
 
 # create some item by owner contract joychi
 
@@ -108,15 +108,10 @@ cargo make call buy_item '{"pet_id": 2, "item_id": 2 }' --accountId $USER2
 cargo make call attack '{"from_id": 1, "to_id": 2}' --accountId $USER1
 cargo make call attack '{"from_id": 1, "to_id": 2}' --accountId $USER1
 
-# calc level pet 
+# calc level pet
 
 cargo make call level_pet '{"pet_id" : 1}' --accountId $USER1
 cargo make call level_pet '{"pet_id" : 2}' --accountId $USER2
-
-# evolution pet
-
-cargo make call evolve '{"pet_id": 1}' --accountId $USER1
-cargo make call evolve '{"pet_id": 1}' --accountId $USER1
 
 # kill pet
 
@@ -124,19 +119,23 @@ cargo make call kill_pet '{"pet_kill": 1, "pet_receive": 2}' --accountId $USER1
 
 # update metadata pet to token uri nft
 
-cargo make call token_uri '{"pet_id": 1}' --accountId $USER1 
+cargo make call token_uri '{"pet_id": 1}' --accountId $USER1
 
-# Give permission to Delegated user to update attribute pet 
+# Give permission to Delegated user to update attribute pet
 
 cargo make call add_access_update_pet '{"pet_id": 1, "user_id":"'$USER1'"}' --accountId $ECO
 
-# Delegated user to update attribute pet 
+# Delegated user to update attribute pet
 
 cargo make call delegate_update_attribute '{"pet_id": 1, "pet_attribute":{pet_name:"Dustin",image: "xyz.com",score: 10000,level: 1,status: 0,star: 0}}' --accountId $ECO
 
+# Check evol pet if reach phase
+
+cargo make call check_evol_pet_if_needed '{"pet_id": 1}' --accountId $USER1
+
 ```
 
-### GET infomation 
+### GET infomation
 
 ```bash
 # get all pet
@@ -147,7 +146,7 @@ cargo make view get_all_pet_metadata
 
 cargo make view get_pet_by_pet_id '{"pet_id": 1}'
 
-# get all battle 
+# get all battle
 
 cargo make view get_all_battle_metadata '{""}'
 
@@ -179,12 +178,11 @@ cargo make view get_all_item_metadata
 
 cargo make view get_item_by_item_id '{"item_id": 1}'
 
+
 ```
 
+## Integration tests
 
-
-
-## Integration tests 
 ### Build contract
 
 ```bash
@@ -192,18 +190,21 @@ cargo make view get_item_by_item_id '{"item_id": 1}'
 ```
 
 ### Run integration tests
+
 1. Go to `integration-tests` folder
+
 ```
     cd integration-tests
 ```
 
 2. Run tests for faucet contract
+
 ```
     cargo run --example faucet
 ```
 
 3. Run tests for joychi contract
+
 ```
     cargo run --example pet
 ```
-

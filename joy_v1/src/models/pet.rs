@@ -28,7 +28,6 @@ pub struct PetMetadata {
     pub reward_debt: u128,
     pub pet_species: u128,
     pub pet_shield: u128,
-    pub pet_evolution: Vec<PetEvolution>,
     pub last_attack_used: u128,
     pub last_attacked: u128,
     pub pet_evolution_item_id: u128,
@@ -46,7 +45,7 @@ pub struct PetSpecies {
     pub species_name: String,
     pub need_evolution_item: bool,
     pub evolution_item_id: u128,
-    pub pet_volution: Vec<PetEvolution>,
+    pub pet_evolution: Vec<PetEvolution>,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -85,21 +84,19 @@ pub trait PetFeature {
 
     fn redeem(&mut self, pet_id: PetId, to_addr: AccountId);
 
-    fn evolve(&mut self, pet_id: PetId);
-
     fn token_uri(&mut self, pet_id: PetId) -> PetAttribute;
 
     fn check_role_update_pet(&self, pet_id: PetId, user_id: AccountId) -> bool;
 
     fn add_access_update_pet(&mut self, pet_id: PetId, user_id: AccountId) -> PetMetadata;
-    
-    // Update pet attribute by delegated user 
+
+    // Update pet attribute by delegated user
     fn delegate_update_attribute(&mut self, pet_id: PetId, pet_attribute: PetAttribute);
-    
+
     // Update nft token metadata
     fn delegate_update_metadata(&mut self, pet_id: PetId, token_metadata: TokenMetadata);
 
-
+    fn check_evol_pet_if_needed(&mut self, pet_id: PetId);
 }
 
 pub trait PetEnum {
@@ -122,4 +119,6 @@ pub trait PetEnum {
     fn get_pet_attack_winrate(&self, pet_id: PetId) -> u128;
 
     fn get_pet_image(&self, pet_id: PetId) -> String;
+
+    fn get_pet_evolution_phase(&self, pet_id: PetId, current_evo_phase: u128) -> u128;
 }
