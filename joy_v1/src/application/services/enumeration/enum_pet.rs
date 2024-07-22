@@ -4,7 +4,7 @@ use crate::{
     application::repository::HOUR,
     models::{
         contract::{BattleMetadata, JoychiV1, JoychiV1Ext, Status},
-        pet::{PetEnum, PetEvolution, PetMetadata},
+        pet::{self, PetEnum, PetEvolution, PetMetadata},
         BattleId, PetId,
     },
 };
@@ -65,16 +65,17 @@ impl PetEnum for JoychiV1 {
 
     fn get_pet_evolution_item(&self, pet_id: PetId) -> PetEvolution {
         let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
+        let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
 
-        let pet_evol = pet.pet_evolution[pet.pet_evolution_phase as usize - 1].clone();
+        let pet_evol = pet_evolution_by_id[pet.pet_evolution_phase as usize - 1].clone();
 
         pet_evol
     }
 
     fn get_pet_attack_winrate(&self, pet_id: PetId) -> u128 {
         let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
-
-        let pet_evol = pet.pet_evolution[pet.pet_evolution_phase as usize - 1]
+        let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
+        let pet_evol = pet_evolution_by_id[pet.pet_evolution_phase as usize - 1]
             .clone()
             .attack_win_rate;
 
@@ -83,11 +84,26 @@ impl PetEnum for JoychiV1 {
 
     fn get_pet_image(&self, pet_id: PetId) -> String {
         let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
+        let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
 
-        let pet_evol = pet.pet_evolution[pet.pet_evolution_phase as usize - 1]
+        let pet_evol = pet_evolution_by_id[pet.pet_evolution_phase as usize - 1]
             .clone()
             .image;
 
         pet_evol
+    }
+
+    fn get_pet_evolution_phase(&self, pet_id: PetId, current_evo_phase: u128) -> u128 {
+        let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
+
+        let evol_phase_pet_now: usize = pet.pet_evolution_phase as usize;
+
+        let pet_evolution = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
+
+        let evol_level = pet_evolution[evol_phase_pet_now - 1].next_evolution_level;
+        if (pet.level >= evol_level) {
+            return self.get_pet_evolution_phase(pet_id, current_evo_phase + 1);
+        }
+        return current_evo_phase;
     }
 }

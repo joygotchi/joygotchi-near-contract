@@ -7,7 +7,7 @@ use near_sdk::{
     AccountId, PanicOnDefault,
 };
 
-use super::pet::PetSpecies;
+use super::pet::{PetEvolution, PetSpecies};
 use super::PetSpeciesId;
 use super::{item::ItemMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
 
@@ -65,6 +65,8 @@ pub struct JoychiV1 {
     pub all_pet_species_id: UnorderedSet<PetSpeciesId>,
 
     pub pet_species_metadata_by_id: LookupMap<PetSpeciesId, PetSpecies>,
+
+    pub pet_evolution_metadata_by_id: LookupMap<PetId, Vec<PetEvolution>>,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -100,4 +102,5 @@ pub enum JoychiV1StorageKey {
     BattleMetadataById,
     AllPetSpeciesId,
     PetSpeciesMetadataById,
+    PetEvolutionMetadataById,
 }
