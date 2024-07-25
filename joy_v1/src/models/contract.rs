@@ -44,6 +44,8 @@ pub struct JoychiV1 {
 
     pub nft_address: AccountId,
 
+    pub nft_item_address: AccountId,
+
     pub manager_address: AccountId,
 
     pub total_score: u128,

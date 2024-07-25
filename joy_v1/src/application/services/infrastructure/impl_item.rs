@@ -3,6 +3,7 @@ use near_sdk::{env, near_bindgen};
 use crate::models::{
     contract::{JoychiV1, JoychiV1Ext},
     item::{ItemFeature, ItemMetadata, ItemRarity},
+    nft_request::external::{cross_item_nft, ItemAttribute, TokenMetadata},
     ItemId,
 };
 
@@ -73,5 +74,46 @@ impl ItemFeature for JoychiV1 {
         item.prototype_itemmining_charge_time = prototype_itemmining_charge_time;
 
         self.item_metadata_by_id.insert(&item_id, &item);
+
+        // TODO
     }
+
+    fn mint_item_for_user(&mut self, to_addr: AccountId, item_id: ItemId) {
+        let item_metadata = self.item_metadata_by_id.get(&item_id).unwrap();
+
+        let token_metadata = TokenMetadata {
+            title: Some(item_metadata.prototype_item_type.clone()),
+            description: Some(format!(
+                "item_image:{}, item_type:{}, cooldown_breed_time:{}, reduce_breed_fee:{}, item_points:{:?}, item_rarity:{:?}, mining_power:{}, mining_charge_time:{}",
+                item_metadata.prototype_item_image,
+                item_metadata.prototype_item_type,
+                item_metadata.prototype_item_cooldown_breed_time,
+                item_metadata.prototype_item_reduce_breed_fee,
+                item_metadata.prototype_item_points,
+                item_metadata.prototype_item_rarity,
+                item_metadata.prototype_itemmining_power,
+                item_metadata.prototype_itemmining_charge_time
+        )),
+            media: Some(item_metadata.prototype_item_image.clone()),
+            media_hash: None,
+            copies: None,
+            issued_at: None,
+            expires_at: Some(env::block_timestamp()),
+            starts_at: Some(env::block_timestamp()),
+            updated_at: Some(env::block_timestamp()),
+            extra: None,
+            reference: None,
+            reference_hash: None,
+        };
+
+        cross_pet_nft::ext(self.nft_item_address.to_owned())
+        .with_static_gas(GAS_FOR_CROSS_CALL)
+        .with_attached_deposit(ATTACHED_DEPOSIT_NFT)
+        .nft_mint(
+            (item_id.clone()).to_string(),
+            token_metadata,
+            owner_id.clone(),
+        );
+    }
+
 }

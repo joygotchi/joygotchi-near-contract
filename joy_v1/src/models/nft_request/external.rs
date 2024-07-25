@@ -6,6 +6,7 @@ use near_sdk::{
 use near_sdk::{ext_contract, AccountId};
 
 use crate::models::contract::Status;
+use crate::models::item::ItemRarity;
 
 #[ext_contract(cross_pet_nft)]
 pub trait CrossCall {
@@ -21,7 +22,19 @@ pub trait CrossCall {
     fn update_token_metadata(&mut self, token_id: String, token_metadata: TokenMetadata);
 }
 
+#[ext_contract(cross_item_nft)]
+pub trait CrossCall {
+    fn nft_mint(
+        &mut self,
+        token_id: String,
+        metadata: TokenMetadata,
+        receiver_id: AccountId,
+        //we add an optional parameter for perpetual royalties
+    );
 
+    fn update_medatada_item(&mut self, token_id: String, item_attribute: ItemAttribute);
+    fn update_token_metadata(&mut self, token_id: String, token_metadata: TokenMetadata);
+}
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
@@ -32,6 +45,19 @@ pub struct PetAttribute {
     pub level: u128,
     pub status: Status,
     pub star: u64,
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ItemAttribute {
+    pub item_image: String,
+    pub item_type: String,
+    pub cooldown_breed_time: u128,
+    pub reduce_breed_fee: u128,
+    pub item_points: u128,
+    pub item_rarity: ItemRarity,
+    pub mining_power: u128,
+    pub mining_charge_time: u128,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
