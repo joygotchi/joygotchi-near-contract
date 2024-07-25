@@ -9,7 +9,7 @@ use crate::{
     models::{
         contract::{BattleMetadata, JoychiV1, JoychiV1Ext, Status},
         ft_request::external::cross_ft,
-        nft_request::external::{cross_nft, PetAttribute, TokenMetadata},
+        nft_request::external::{cross_pet_nft, PetAttribute, TokenMetadata},
         pet::{PetEnum, PetEvolution, PetFeature, PetMetadata, PetSpecies},
         ItemId, PetId,
     },
@@ -49,7 +49,7 @@ impl PetFeature for JoychiV1 {
             star: pet.star,
         };
 
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_medatada_pet(pet_id.to_string(), pet_attribute.clone());
 
@@ -61,7 +61,7 @@ impl PetFeature for JoychiV1 {
             self.check_role_update_pet(pet_id, env::signer_account_id()),
             "You're not permission"
         );
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_medatada_pet(pet_id.to_string(), pet_attribute);
     }
@@ -71,7 +71,7 @@ impl PetFeature for JoychiV1 {
             self.check_role_update_pet(pet_id, env::signer_account_id()),
             "You're not permission"
         );
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_token_metadata(pet_id.to_string(), token_metadata);
     }
@@ -143,7 +143,7 @@ impl PetFeature for JoychiV1 {
         self.pet_metadata_by_id.insert(&pet_id, &pet_metadata);
         self.all_pet_id.insert(&pet_id);
 
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .with_attached_deposit(ATTACHED_DEPOSIT_NFT)
             .nft_mint(
@@ -171,46 +171,46 @@ impl PetFeature for JoychiV1 {
         self.pet_metadata_by_id.insert(&pet_id, &pet);
     }
 
-    fn buy_item(&mut self, pet_id: PetId, item_id: ItemId) {
-        let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
+    // fn buy_item(&mut self, pet_id: PetId, item_id: ItemId) {
+    //     let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
 
-        let mut item = self.item_metadata_by_id.get(&item_id).unwrap();
+    //     let mut item = self.item_metadata_by_id.get(&item_id).unwrap();
 
-        assert!(
-            pet.owner_id == env::signer_account_id(),
-            "You're not permission"
-        );
-        assert!(
-            self.is_pet_alive(pet_id) || (!self.is_pet_alive(pet_id) && item.is_revival),
-            "Pet's not alive"
-        );
-        assert!(item.name.len() > 0, "This item doesn't exist");
+    //     assert!(
+    //         pet.owner_id == env::signer_account_id(),
+    //         "You're not permission"
+    //     );
+    //     assert!(
+    //         self.is_pet_alive(pet_id) || (!self.is_pet_alive(pet_id) && item.is_revival),
+    //         "Pet's not alive"
+    //     );
+    //     assert!(item.name.len() > 0, "This item doesn't exist");
 
-        if pet.pet_need_evolution_item && pet.pet_evolution_item_id == item_id as u128 {
-            pet.pet_has_evolution_item = true;
-        }
+    //     if pet.pet_need_evolution_item && pet.pet_evolution_item_id == item_id as u128 {
+    //         pet.pet_has_evolution_item = true;
+    //     }
 
-        pet.items.push(item.clone());
+    //     pet.items.push(item.clone());
 
-        self.total_score += item.points;
+    //     self.total_score += item.points;
 
-        pet.score += item.points;
-        pet.pet_shield += item.shield;
+    //     pet.score += item.points;
+    //     pet.pet_shield += item.shield;
 
-        pet.time_until_starving = env::block_timestamp() as u128 + item.time_extension;
+    //     pet.time_until_starving = env::block_timestamp() as u128 + item.time_extension;
 
-        // calc petRewardDebt
+    //     // calc petRewardDebt
 
-        item.price += item.price_delta;
-        item.stock -= 1;
+    //     item.price += item.price_delta;
+    //     item.stock -= 1;
 
-        self.item_metadata_by_id.insert(&item_id, &item);
-        self.pet_metadata_by_id.insert(&pet_id, &pet);
+    //     self.item_metadata_by_id.insert(&item_id, &item);
+    //     self.pet_metadata_by_id.insert(&pet_id, &pet);
 
-        cross_ft::ext(self.ft_address.to_owned())
-            .with_static_gas(GAS_FOR_CROSS_CALL)
-            .ft_burn(pet.owner_id.clone(), U128(item.price));
-    }
+    //     cross_ft::ext(self.ft_address.to_owned())
+    //         .with_static_gas(GAS_FOR_CROSS_CALL)
+    //         .ft_burn(pet.owner_id.clone(), U128(item.price));
+    // }
 
     fn attack(&mut self, from_id: PetId, to_id: PetId) -> BattleMetadata {
         assert!(from_id != to_id, "Can't hurt yourself");

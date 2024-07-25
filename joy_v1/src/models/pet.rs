@@ -64,7 +64,7 @@ pub trait PetFeature {
 
     fn change_name_pet(&mut self, pet_id: PetId, name: String);
 
-    fn buy_item(&mut self, pet_id: PetId, item_id: ItemId);
+    // fn buy_item(&mut self, pet_id: PetId, item_id: ItemId);
 
     fn attack(&mut self, from_id: PetId, to_id: PetId) -> BattleMetadata;
 

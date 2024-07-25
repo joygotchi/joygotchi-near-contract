@@ -9,40 +9,50 @@ use super::ItemId;
 #[serde(crate = "near_sdk::serde")]
 pub struct ItemMetadata {
     pub item_id: ItemId,
-    pub name: String,
-    pub points: u128,
-    pub price: u128,
-    pub price_delta: u128,
-    pub stock: u128,
-    pub shield: u128,
-    pub time_extension: u128,
-    pub is_revival: bool,
+    pub item_rarity_amount: u128,
+    pub list_prototype_items_of_rarity: Vec<u128>,
+    pub prototype_item_image: String,
+    pub prototype_item_type: String,
+    pub prototype_item_cooldown_breed_time: u128,
+    pub prototype_item_reduce_breed_fee: u128,
+    pub prototype_item_points: u128,
+    pub prototype_item_rarity: ItemRarity,
+    pub prototype_itemmining_power: u128,
+    pub prototype_itemmining_charge_time: u128,
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub enum ItemRarity {
+    Common,
+    Rare,
+    Legendary,
+    Epic
 }
 
 pub trait ItemFeature {
     fn create_item(
         &mut self,
-        name: String,
-        price: u128,
-        points: u128,
-        time_extension: u128,
-        price_delta: u128,
-        stock: u128,
-        shield: u128,
-        is_revival: bool,
+        prototype_item_image: String,
+        prototype_item_type: String,
+        prototype_item_cooldown_breed_time: u128,
+        prototype_item_reduce_breed_fee: u128,
+        prototype_item_points: u128,
+        prototype_item_rarity: ItemRarity,
+        prototype_itemmining_power: u128,
+        prototype_itemmining_charge_time: u128,
     ) -> ItemMetadata;
 
     fn edit_item(
         &mut self,
         item_id: ItemId,
-        name: String,
-        price: u128,
-        points: u128,
-        time_extension: u128,
-        price_delta: u128,
-        stock: u128,
-        shield: u128,
-        is_revival: bool,
+        prototype_item_image: String,
+        prototype_item_cooldown_breed_time: u128,
+        prototype_item_reduce_breed_fee: u128,
+        prototype_item_points: u128,
+        prototype_item_rarity: ItemRarity,
+        prototype_itemmining_power: u128,
+        prototype_itemmining_charge_time: u128,
     );
 }
 

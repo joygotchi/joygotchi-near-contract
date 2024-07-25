@@ -7,7 +7,7 @@ use near_sdk::{ext_contract, AccountId};
 
 use crate::models::contract::Status;
 
-#[ext_contract(cross_nft)]
+#[ext_contract(cross_pet_nft)]
 pub trait CrossCall {
     fn nft_mint(
         &mut self,
@@ -20,6 +20,8 @@ pub trait CrossCall {
     fn update_medatada_pet(&mut self, token_id: String, pet_attribute: PetAttribute);
     fn update_token_metadata(&mut self, token_id: String, token_metadata: TokenMetadata);
 }
+
+
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
