@@ -28,20 +28,6 @@ pub struct TokenMetadata {
 }
 
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
-#[serde(crate = "near_sdk::serde")]
-pub struct ItemMetadata {
-    pub item_id: ItemId,
-    pub name: String,
-    pub points: u128,
-    pub price: u128,
-    pub price_delta: u128,
-    pub stock: u128,
-    pub shield: u128,
-    pub time_extension: u128,
-    pub is_revival: bool,
-}
-
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(crate = "near_sdk::serde")]
@@ -79,13 +65,39 @@ pub struct PetMetadata {
     pub reward_debt: u128,
     pub pet_species: u128,
     pub pet_shield: u128,
-    pub pet_evolution: Vec<PetEvolution>,
     pub last_attack_used: u128,
     pub last_attacked: u128,
     pub pet_evolution_item_id: u128,
     pub pet_need_evolution_item: bool,
     pub pet_has_evolution_item: bool,
     pub pet_evolution_phase: u128,
+    pub extra_permission: Vec<AccountId>,
+    pub category: String,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub enum ItemRarity {
+    Common,
+    Rare,
+    Legendary,
+    Epic,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ItemMetadata {
+    pub item_id: ItemId,
+    pub item_rarity_amount: u128,
+    pub list_prototype_items_of_rarity: Vec<u128>,
+    pub prototype_item_image: String,
+    pub prototype_item_type: String,
+    pub prototype_item_cooldown_breed_time: u128,
+    pub prototype_item_reduce_breed_fee: u128,
+    pub prototype_item_points: u128,
+    pub prototype_item_rarity: ItemRarity,
+    pub prototype_itemmining_power: u128,
+    pub prototype_itemmining_charge_time: u128,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
