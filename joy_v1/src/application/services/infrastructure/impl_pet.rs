@@ -238,7 +238,7 @@ impl PetFeature for JoychiV1 {
             "can be attacked once every hour"
         );
         assert!(
-            pet_from.level < pet_to.level,
+            pet_from.level <= pet_to.level,
             "Only attack pets above your level"
         );
 
