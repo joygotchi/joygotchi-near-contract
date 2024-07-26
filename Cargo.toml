@@ -3,7 +3,8 @@ resolver = "2"
 members = [
     "faucet",
     "ft_token",
-    "nft",
+    "nft_item",
+    "nft_pet",
     "joy_v1",
     "integration-tests"
 ]
