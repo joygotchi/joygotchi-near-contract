@@ -1,6 +1,7 @@
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     serde::{Deserialize, Serialize},
+    AccountId,
 };
 
 use super::ItemId;
@@ -27,7 +28,7 @@ pub enum ItemRarity {
     Common,
     Rare,
     Legendary,
-    Epic
+    Epic,
 }
 
 pub trait ItemFeature {
@@ -54,6 +55,8 @@ pub trait ItemFeature {
         prototype_itemmining_power: u128,
         prototype_itemmining_charge_time: u128,
     );
+
+    fn mint_item_for_user(&mut self, to_addr: AccountId, item_id: ItemId);
 }
 
 pub trait ItemEnum {

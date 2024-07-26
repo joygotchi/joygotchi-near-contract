@@ -9,7 +9,7 @@ use crate::models::contract::Status;
 use crate::models::item::ItemRarity;
 
 #[ext_contract(cross_pet_nft)]
-pub trait CrossCall {
+pub trait PetCrossCall {
     fn nft_mint(
         &mut self,
         token_id: String,
@@ -23,7 +23,7 @@ pub trait CrossCall {
 }
 
 #[ext_contract(cross_item_nft)]
-pub trait CrossCall {
+pub trait ItemCrossCall {
     fn nft_mint(
         &mut self,
         token_id: String,

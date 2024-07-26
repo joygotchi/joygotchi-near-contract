@@ -1,4 +1,4 @@
-use near_sdk::{env, near_bindgen};
+use near_sdk::{env, near_bindgen, AccountId};
 
 use crate::models::{
     contract::{JoychiV1, JoychiV1Ext},
@@ -6,6 +6,8 @@ use crate::models::{
     nft_request::external::{cross_item_nft, ItemAttribute, TokenMetadata},
     ItemId,
 };
+
+use super::impl_pet::{ATTACHED_DEPOSIT_NFT, GAS_FOR_CROSS_CALL};
 
 #[near_bindgen]
 impl ItemFeature for JoychiV1 {
@@ -106,13 +108,13 @@ impl ItemFeature for JoychiV1 {
             reference_hash: None,
         };
 
-        cross_pet_nft::ext(self.nft_item_address.to_owned())
+        cross_item_nft::ext(self.nft_item_address.to_owned())
         .with_static_gas(GAS_FOR_CROSS_CALL)
         .with_attached_deposit(ATTACHED_DEPOSIT_NFT)
         .nft_mint(
             (item_id.clone()).to_string(),
             token_metadata,
-            owner_id.clone(),
+            to_addr.clone(),
         );
     }
 
