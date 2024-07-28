@@ -93,15 +93,15 @@ cargo make call change_name_pet '{"pet_id": 1, "name": "Joychi 2" }' --accountId
 
 # create some item by owner contract joychi
 
-cargo make call create_item '{"name": "test3", "price": 100, "points": 10, "time_extension": 10002131000000, "price_delta": 0, "stock": 3, "shield": 2, "is_revival": true}' --accountId $ECO
+cargo make call create_item_immidiate '{"name": "test3", "price": 100, "points": 10, "time_extension": 10002131000000, "price_delta": 0, "stock": 3, "shield": 2, "is_revival": true}' --accountId $ECO
 
-cargo make call create_item '{"name": "test2", "price": 100, "points": 10, "time_extension": 10002131100000, "price_delta": 0, "stock": 3, "shield": 2, "is_revival": false }' --accountId $ECO
+cargo make call create_item_immidiate '{"name": "test2", "price": 100, "points": 10, "time_extension": 10002131100000, "price_delta": 0, "stock": 3, "shield": 2, "is_revival": false }' --accountId $ECO
 
 # buy item for pet
 
-cargo make call buy_item '{"pet_id": 1, "item_id": 1 }' --accountId $USER1
+cargo make call buy_item_immidiate '{"pet_id": 1, "item_id": 1 }' --accountId $USER1
 
-cargo make call buy_item '{"pet_id": 2, "item_id": 2 }' --accountId $USER2
+cargo make call buy_item_immidiate '{"pet_id": 2, "item_id": 2 }' --accountId $USER2
 
 # attack different pet
 
@@ -170,13 +170,13 @@ cargo make view get_pet_attack_winrate '{"pet_id": 1}'
 
 cargo make view get_pet_image '{"pet_id": 1}'
 
-# get all item
+# get all item immidiate
 
-cargo make view get_all_item_metadata
+cargo make view get_all_item_immidiate_metadata
 
 # get item by item id
 
-cargo make view get_item_by_item_id '{"item_id": 1}'
+cargo make view get_item_immidiate_by_item_id '{"item_id": 1}'
 
 
 ```

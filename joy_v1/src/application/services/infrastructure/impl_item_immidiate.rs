@@ -2,13 +2,13 @@ use near_sdk::{env, near_bindgen};
 
 use crate::models::{
     contract::{JoychiV1, JoychiV1Ext},
-    item::{ItemFeature, ItemMetadata},
+    item_immidiate::{ItemImmidiateFeature, ItemImmidiateMetadata},
     ItemId,
 };
 
 #[near_bindgen]
-impl ItemFeature for JoychiV1 {
-    fn create_item(
+impl ItemImmidiateFeature for JoychiV1 {
+    fn create_item_immidiate(
         &mut self,
         name: String,
         price: u128,
@@ -18,14 +18,14 @@ impl ItemFeature for JoychiV1 {
         stock: u128,
         shield: u128,
         is_revival: bool,
-    ) -> ItemMetadata {
+    ) -> ItemImmidiateMetadata {
         assert!(
             self.owner_id == env::signer_account_id(),
             "You're not permission"
         );
-        let num_item_id = self.all_item_id.len();
+        let num_item_id = self.all_item_immidiate_id.len();
 
-        let item_metadata = ItemMetadata {
+        let item_metadata = ItemImmidiateMetadata {
             item_id: num_item_id + 1,
             name,
             price,
@@ -37,14 +37,14 @@ impl ItemFeature for JoychiV1 {
             is_revival,
         };
 
-        self.item_metadata_by_id
+        self.item_immidiate_metadata_by_id
             .insert(&(&num_item_id + 1), &item_metadata);
-        self.all_item_id.insert(&(&num_item_id + 1));
+        self.all_item_immidiate_id.insert(&(&num_item_id + 1));
 
         item_metadata
     }
 
-    fn edit_item(
+    fn edit_item_immidiate(
         &mut self,
         item_id: ItemId,
         name: String,
@@ -56,7 +56,7 @@ impl ItemFeature for JoychiV1 {
         shield: u128,
         is_revival: bool,
     ) {
-        let mut item = self.item_metadata_by_id.get(&item_id).unwrap();
+        let mut item = self.item_immidiate_metadata_by_id.get(&item_id).unwrap();
 
         assert!(
             self.owner_id == env::signer_account_id(),
@@ -72,6 +72,6 @@ impl ItemFeature for JoychiV1 {
         item.shield = shield;
         item.is_revival = is_revival;
 
-        self.item_metadata_by_id.insert(&item_id, &item);
+        self.item_immidiate_metadata_by_id.insert(&item_id, &item);
     }
 }

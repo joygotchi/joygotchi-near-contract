@@ -64,7 +64,7 @@ impl PetEnum for JoychiV1 {
     }
 
     fn get_pet_evolution_item(&self, pet_id: PetId) -> PetEvolution {
-        let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
+        let pet: PetMetadata = self.pet_metadata_by_id.get(&pet_id).unwrap();
         let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
 
         let pet_evol = pet_evolution_by_id[pet.pet_evolution_phase as usize - 1].clone();

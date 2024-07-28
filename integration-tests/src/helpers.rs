@@ -30,7 +30,7 @@ pub struct TokenMetadata {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(crate = "near_sdk::serde")]
-pub struct ItemMetadata {
+pub struct ItemImmidiateMetadata {
     pub item_id: ItemId,
     pub name: String,
     pub points: u128,
@@ -71,7 +71,7 @@ pub struct PetMetadata {
     pub owner_id: AccountId,
     pub time_pet_born: u128,
     pub time_until_starving: u128,
-    pub items: Vec<ItemMetadata>,
+    pub items: Vec<ItemImmidiateMetadata>,
     pub score: u128,
     pub level: u128,
     pub status: Status,
@@ -148,13 +148,13 @@ pub async fn get_pet_metadata_by_id(
     Ok(pet)
 }
 
-pub async fn get_item_metadata_by_id(
+pub async fn get_item_immidiate_metadata_by_id(
     user: &Account,
     item_id: ItemId,
     joychi_contract: &Contract,
-) -> anyhow::Result<ItemMetadata> {
-    let item: ItemMetadata = user
-        .call(joychi_contract.id(), "get_item_by_item_id")
+) -> anyhow::Result<ItemImmidiateMetadata> {
+    let item: ItemImmidiateMetadata = user
+        .call(joychi_contract.id(), "get_item_immidiate_metadata_by_id")
         .args_json(json!({
             "item_id": item_id
         }))

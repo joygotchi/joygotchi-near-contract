@@ -9,7 +9,7 @@ use near_sdk::{
 
 use super::pet::{PetEvolution, PetSpecies};
 use super::PetSpeciesId;
-use super::{item::ItemMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
+use super::{item_immidiate::ItemImmidiateMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
@@ -50,9 +50,9 @@ pub struct JoychiV1 {
 
     pub ft_address: AccountId,
 
-    pub all_item_id: UnorderedSet<ItemId>,
+    pub all_item_immidiate_id: UnorderedSet<ItemId>,
 
-    pub item_metadata_by_id: LookupMap<ItemId, ItemMetadata>,
+    pub item_immidiate_metadata_by_id: LookupMap<ItemId, ItemImmidiateMetadata>,
 
     pub all_pet_id: UnorderedSet<PetId>,
 
@@ -94,8 +94,8 @@ pub enum Status {
 
 #[derive(BorshSerialize)]
 pub enum JoychiV1StorageKey {
-    AllItemId,
-    ItemMetadataById,
+    AllItemImmidiateId,
+    ItemImmidiateMetadataById,
     AllPetId,
     PetMetadataById,
     AllBattleId,

@@ -25,9 +25,9 @@ impl JoychiV1 {
             manager_address: env::signer_account_id(),
             total_score: 0,
             ft_address: ft_addr,
-            all_item_id: UnorderedSet::new(JoychiV1StorageKey::AllItemId.try_to_vec().unwrap()),
-            item_metadata_by_id: LookupMap::new(
-                JoychiV1StorageKey::ItemMetadataById.try_to_vec().unwrap(),
+            all_item_immidiate_id: UnorderedSet::new(JoychiV1StorageKey::AllItemImmidiateId.try_to_vec().unwrap()),
+            item_immidiate_metadata_by_id: LookupMap::new(
+                JoychiV1StorageKey::ItemImmidiateMetadataById.try_to_vec().unwrap(),
             ),
             all_pet_id: UnorderedSet::new(JoychiV1StorageKey::AllPetId.try_to_vec().unwrap()),
             pet_metadata_by_id: LookupMap::new(

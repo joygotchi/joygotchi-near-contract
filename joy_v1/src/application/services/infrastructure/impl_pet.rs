@@ -171,10 +171,10 @@ impl PetFeature for JoychiV1 {
         self.pet_metadata_by_id.insert(&pet_id, &pet);
     }
 
-    fn buy_item(&mut self, pet_id: PetId, item_id: ItemId) {
+    fn buy_item_immidiate(&mut self, pet_id: PetId, item_id: ItemId) {
         let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
 
-        let mut item = self.item_metadata_by_id.get(&item_id).unwrap();
+        let mut item = self.item_immidiate_metadata_by_id.get(&item_id).unwrap();
 
         assert!(
             pet.owner_id == env::signer_account_id(),
@@ -207,7 +207,7 @@ impl PetFeature for JoychiV1 {
         item.price += item.price_delta;
         item.stock -= 1;
 
-        self.item_metadata_by_id.insert(&item_id, &item);
+        self.item_immidiate_metadata_by_id.insert(&item_id, &item);
         self.pet_metadata_by_id.insert(&pet_id, &pet);
 
         cross_ft::ext(self.ft_address.to_owned())
