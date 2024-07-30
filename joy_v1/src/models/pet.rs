@@ -72,7 +72,7 @@ pub trait PetFeature {
 
     fn level_pet(&mut self, pet_id: PetId) -> u128;
 
-    fn is_pet_alive(&mut self, pet_id: PetId) -> bool;
+    fn is_pet_alive(&self, pet_id: PetId) -> bool;
 
     fn create_species(
         &mut self,
