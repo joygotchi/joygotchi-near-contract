@@ -197,8 +197,11 @@ impl PetFeature for JoychiV1 {
         pet.score += item.points;
         pet.pet_shield += item.shield;
 
-        pet.time_until_starving = env::block_timestamp() as u128 + item.time_extension;
+        let time_extension = env::block_timestamp() as u128 + item.time_extension;
+        pet.time_until_starving = time_extension;
 
+        pet.status = update_status_pet(time_extension);
+        
         // calc petRewardDebt
 
         item.price += item.price_delta;
@@ -273,7 +276,7 @@ impl PetFeature for JoychiV1 {
             pet_to.last_attack_used = env::block_timestamp() as u128;
             pet_from.last_attacked = env::block_timestamp() as u128;
 
-            loser = to_id;
+            loser = from_id;
         }
 
         let num_battle = self.all_battle_id.len() + 1;
@@ -348,7 +351,7 @@ impl PetFeature for JoychiV1 {
         pet_level
     }
 
-    fn is_pet_alive(&mut self, pet_id: PetId) -> bool {
+    fn is_pet_alive(&self, pet_id: PetId) -> bool {
         let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
         if pet.time_until_starving >= env::block_timestamp() as u128 {
             return true;
@@ -435,5 +438,25 @@ impl PetFeature for JoychiV1 {
         pet.reward_debt = 0;
 
         Promise::new(to_addr.clone()).transfer(1 / 10_000);
+    }
+}
+
+
+
+// Helper function
+fn update_status_pet(time_until_starving: u128) -> Status {
+
+    if time_until_starving > (env::block_timestamp() as u128 + 16 * HOUR) {
+        return Status::HAPPY;
+    } else if time_until_starving > (env::block_timestamp() as u128 + 12 * HOUR)
+        && time_until_starving < (env::block_timestamp() as u128 + 16 * HOUR)
+    {
+        return Status::HUNGRY;
+    } else if time_until_starving > (env::block_timestamp() as u128 + 8 * HOUR)
+        && time_until_starving < (env::block_timestamp() as u128 + 12 * HOUR)
+    {
+        return Status::STARVING;
+    } else {
+        return Status::DYING;
     }
 }
