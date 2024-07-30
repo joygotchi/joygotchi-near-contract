@@ -7,6 +7,7 @@ use near_sdk::{
     AccountId, PanicOnDefault,
 };
 
+use super::item_factory::ItemMetadata;
 use super::pet::{PetEvolution, PetSpecies};
 use super::PetSpeciesId;
 use super::{item_immidiate::ItemImmidiateMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
@@ -44,6 +45,8 @@ pub struct JoychiV1 {
 
     pub nft_address: AccountId,
 
+    pub nft_item_address: AccountId,
+
     pub manager_address: AccountId,
 
     pub total_score: u128,
@@ -53,6 +56,10 @@ pub struct JoychiV1 {
     pub all_item_immidiate_id: UnorderedSet<ItemId>,
 
     pub item_immidiate_metadata_by_id: LookupMap<ItemId, ItemImmidiateMetadata>,
+
+    pub all_item_id: UnorderedSet<ItemId>,
+
+    pub item_metadata_by_id: LookupMap<ItemId, ItemMetadata>,
 
     pub all_pet_id: UnorderedSet<PetId>,
 
@@ -96,6 +103,8 @@ pub enum Status {
 pub enum JoychiV1StorageKey {
     AllItemImmidiateId,
     ItemImmidiateMetadataById,
+    AllItemId,
+    ItemMetadataById,
     AllPetId,
     PetMetadataById,
     AllBattleId,

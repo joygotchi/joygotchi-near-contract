@@ -9,7 +9,7 @@ use crate::{
     models::{
         contract::{BattleMetadata, JoychiV1, JoychiV1Ext, Status},
         ft_request::external::cross_ft,
-        nft_request::external::{cross_nft, PetAttribute, TokenMetadata},
+        nft_request::external::{cross_pet_nft, PetAttribute, TokenMetadata},
         pet::{PetEnum, PetEvolution, PetFeature, PetMetadata, PetSpecies},
         ItemId, PetId,
     },
@@ -49,7 +49,7 @@ impl PetFeature for JoychiV1 {
             star: pet.star,
         };
 
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_medatada_pet(pet_id.to_string(), pet_attribute.clone());
 
@@ -61,7 +61,7 @@ impl PetFeature for JoychiV1 {
             self.check_role_update_pet(pet_id, env::signer_account_id()),
             "You're not permission"
         );
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_medatada_pet(pet_id.to_string(), pet_attribute);
     }
@@ -71,7 +71,7 @@ impl PetFeature for JoychiV1 {
             self.check_role_update_pet(pet_id, env::signer_account_id()),
             "You're not permission"
         );
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_token_metadata(pet_id.to_string(), token_metadata);
     }
@@ -143,7 +143,7 @@ impl PetFeature for JoychiV1 {
         self.pet_metadata_by_id.insert(&pet_id, &pet_metadata);
         self.all_pet_id.insert(&pet_id);
 
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .with_attached_deposit(ATTACHED_DEPOSIT_NFT)
             .nft_mint(
