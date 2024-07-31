@@ -9,7 +9,8 @@ use near_sdk::{
 
 use super::item_factory::ItemMetadata;
 use super::pet::{PetEvolution, PetSpecies};
-use super::PetSpeciesId;
+use super::staking_and_mining::PoolMetadata;
+use super::{PetSpeciesId, PoolId};
 use super::{item_immidiate::ItemImmidiateMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
@@ -74,6 +75,11 @@ pub struct JoychiV1 {
     pub pet_species_metadata_by_id: LookupMap<PetSpeciesId, PetSpecies>,
 
     pub pet_evolution_metadata_by_id: LookupMap<PetId, Vec<PetEvolution>>,
+
+    pub pool_metadata_by_id: LookupMap<PoolId, PoolMetadata>,
+
+    pub all_pool_id: UnorderedSet<PoolId>,
+
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -112,4 +118,6 @@ pub enum JoychiV1StorageKey {
     AllPetSpeciesId,
     PetSpeciesMetadataById,
     PetEvolutionMetadataById,
+    PoolMetadataById,
+    AllPoolId,
 }

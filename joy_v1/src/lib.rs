@@ -55,6 +55,12 @@ impl JoychiV1 {
                     .try_to_vec()
                     .unwrap(),
             ),
+            pool_metadata_by_id: LookupMap::new(
+                JoychiV1StorageKey::PoolMetadataById.try_to_vec().unwrap()
+            ),
+            all_pool_id: UnorderedSet::new(
+                JoychiV1StorageKey::AllPoolId.try_to_vec().unwrap(),
+            ),
         }
     }
 }

@@ -117,6 +117,7 @@ impl PetFeature for JoychiV1 {
             pet_evolution_phase: 1,
             extra_permission: Vec::new(),
             category: pet_species.species_name,
+            is_lock: false,
         };
 
         let token_metadata = TokenMetadata {

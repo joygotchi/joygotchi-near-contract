@@ -36,6 +36,7 @@ pub struct PetMetadata {
     pub pet_evolution_phase: u128,
     pub extra_permission: Vec<AccountId>,
     pub category: String,
+    pub is_lock: bool,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
