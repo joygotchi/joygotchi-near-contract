@@ -1,4 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::BorshStorageKey;
 use near_sdk::{
     collections::{LookupMap, UnorderedSet},
     json_types::Base64VecU8,
@@ -80,6 +81,8 @@ pub struct JoychiV1 {
 
     pub all_pool_id: UnorderedSet<PoolId>,
 
+    pub user_staked_pet_count: LookupMap<AccountId, LookupMap<PoolId, u64>>,
+
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -105,7 +108,7 @@ pub enum Status {
     DYING,
 }
 
-#[derive(BorshSerialize)]
+#[derive(BorshSerialize, BorshStorageKey)]
 pub enum JoychiV1StorageKey {
     AllItemImmidiateId,
     ItemImmidiateMetadataById,
@@ -120,4 +123,6 @@ pub enum JoychiV1StorageKey {
     PetEvolutionMetadataById,
     PoolMetadataById,
     AllPoolId,
+    UserStakedPetCountOuter,
+    UserStakedPetCountInner { account_id: AccountId },
 }

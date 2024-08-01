@@ -61,6 +61,8 @@ impl JoychiV1 {
             all_pool_id: UnorderedSet::new(
                 JoychiV1StorageKey::AllPoolId.try_to_vec().unwrap(),
             ),
+            user_staked_pet_count: LookupMap::new(JoychiV1StorageKey::UserStakedPetCountOuter.try_to_vec().unwrap()),
+
         }
     }
 }

@@ -1,7 +1,7 @@
-use near_sdk::{env, near_bindgen, AccountId};
+use near_sdk::{collections::LookupMap, env, json_types::U128, near_bindgen, AccountId};
 
 use crate::models::{
-    contract::{JoychiV1, JoychiV1Ext}, pet::PetFeature, staking_and_mining::{PetCountUser, PoolInfo, PoolMetadata, StakingAndMining}
+    contract::{JoychiV1, JoychiV1Ext, JoychiV1StorageKey}, ft_request::external::cross_ft, item_factory::ItemFeature, pet::PetFeature, staking_and_mining::{NFTInfo, PetCountUser, PoolInfo, PoolMetadata, StakingAndMining}, PetId, PoolId
 };
 
 use super::impl_pet::{ATTACHED_DEPOSIT_NFT, GAS_FOR_CROSS_CALL};
@@ -27,7 +27,6 @@ impl StakingAndMining for JoychiV1 {
             pool_id: num_pool + 1,
             price_per_slot: 37,
             pool_info: new_pool,
-            user_staked_pet_count: Vec::new(),
             staked_pets: Vec::new(),
         };
 
@@ -38,35 +37,80 @@ impl StakingAndMining for JoychiV1 {
 
     }
 
-    fn stake(&mut self, pet_id: PetId, pool_id: PoolId) {
+    fn stake(&mut self, pet_id: PetId, pool_id: PoolId) -> PoolMetadata {
         let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
         let mut pool = self.pool_metadata_by_id.get(&pool_id).unwrap();
+        let account_id = env::signer_account_id();
 
-        assert!(pool.pool_info.staking_start_time < env::block_timestamp(), "Staking pool has started");
+        assert!(pool.pool_id == pool_id, "Invalid pool id");
+        assert!(pool.pool_info.staking_start_time < env::block_timestamp() as u128, "Staking pool has started");
         assert!(
-            env::signer_account_id() == pet.owner_id,
+           account_id == pet.owner_id,
             "You're not owner this pet"
         );
 
         assert!(self.is_pet_alive(pet_id), "Your pet is dead, you cannot stake it");
         assert!(pet.is_lock == false, "Your pet is locked, you cannot stake it");
-        assert!(pool.total_staked_slot < pool.max_slot_in_pool , "Staking pool is full");
+        assert!(pool.pool_info.total_staked_slot < pool.pool_info.max_slot_in_pool , "Staking pool is full");
 
         pet.is_lock = true;
 
-        let peet_count = 0;
+        let mut inner_map = self.user_staked_pet_count.get(&account_id).unwrap_or_else(|| {
+            LookupMap::new(JoychiV1StorageKey::UserStakedPetCountInner { account_id: account_id.clone() })
+        });
 
-        for user_count in 
+        let current_count = inner_map.get(&pool_id).unwrap_or(0);
+        inner_map.insert(&pool_id, &(current_count + 1));
+        self.user_staked_pet_count.insert(&account_id, &inner_map);
 
-        let user_count_info = PetCountUser {
-            user: pet.owner_id,
-            // pet_count: pool.user_staked_pet_count.
+        pool.pool_info.total_staked_slot += 1;
+
+        let nft_info = NFTInfo {
+            nft_id: pet_id as u128,
+            owner: account_id
         };
-        pool.user_staked_pet_count;
 
+        pool.staked_pets.push(nft_info);
+        
+        self.pool_metadata_by_id.insert(&pool_id, &pool);
+        
+        pool
 
     }
     fn un_stake(&mut self, pet_id: PetId, pool_id: PoolId) {
+        let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
+        let mut pool = self.pool_metadata_by_id.get(&pool_id).unwrap();
+        let account_id = env::signer_account_id();
+        let mut is_staked_pet_owner = false;
+        for owner in pool.staked_pets {
+            if owner.owner == account_id && owner.nft_id == pet_id as u128 {
+                is_staked_pet_owner = true;
+            }
+        }
+
+        assert!(is_staked_pet_owner, "Pet not staked");
+
+        assert!(pool.pool_id == pool_id, "Invalid pool id");
+        assert!(pool.pool_info.staking_end_time < env::block_timestamp() as u128, "Staking pool has not ended yet");
+        assert!(
+           account_id == pet.owner_id,
+            "You're not owner this pet"
+        );
+
+        assert!(self.is_pet_alive(pet_id), "Your pet is dead, you cannot stake it");
+        assert!(pet.is_lock == true, "Your pet is not locked, you cannot unstake it");
+
+        pet.is_lock = false;
+
+        for reward in pool.pool_info.reward_nft_ids {
+            self.mint_item_for_user(account_id.clone(), reward as u64);
+        }
+
+        cross_ft::ext(self.ft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .ft_transfer(pet.owner_id.clone(), U128::from(pool.price_per_slot), None);
+
+        self.pet_metadata_by_id.insert(&pet_id, &pet);
 
     }
 }
