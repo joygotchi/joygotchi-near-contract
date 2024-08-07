@@ -1,4 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::BorshStorageKey;
 use near_sdk::{
     collections::{LookupMap, UnorderedSet},
     json_types::Base64VecU8,
@@ -7,9 +8,11 @@ use near_sdk::{
     AccountId, PanicOnDefault,
 };
 
+use super::item_factory::ItemMetadata;
 use super::pet::{PetEvolution, PetSpecies};
-use super::PetSpeciesId;
-use super::{item::ItemMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
+use super::staking_and_mining::PoolMetadata;
+use super::{PetSpeciesId, PoolId};
+use super::{item_immidiate::ItemImmidiateMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
@@ -44,11 +47,17 @@ pub struct JoychiV1 {
 
     pub nft_address: AccountId,
 
+    pub nft_item_address: AccountId,
+
     pub manager_address: AccountId,
 
     pub total_score: u128,
 
     pub ft_address: AccountId,
+
+    pub all_item_immidiate_id: UnorderedSet<ItemId>,
+
+    pub item_immidiate_metadata_by_id: LookupMap<ItemId, ItemImmidiateMetadata>,
 
     pub all_item_id: UnorderedSet<ItemId>,
 
@@ -67,6 +76,13 @@ pub struct JoychiV1 {
     pub pet_species_metadata_by_id: LookupMap<PetSpeciesId, PetSpecies>,
 
     pub pet_evolution_metadata_by_id: LookupMap<PetId, Vec<PetEvolution>>,
+
+    pub pool_metadata_by_id: LookupMap<PoolId, PoolMetadata>,
+
+    pub all_pool_id: UnorderedSet<PoolId>,
+
+    pub user_staked_pet_count: LookupMap<AccountId, LookupMap<PoolId, u64>>,
+
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -92,8 +108,10 @@ pub enum Status {
     DYING,
 }
 
-#[derive(BorshSerialize)]
+#[derive(BorshSerialize, BorshStorageKey)]
 pub enum JoychiV1StorageKey {
+    AllItemImmidiateId,
+    ItemImmidiateMetadataById,
     AllItemId,
     ItemMetadataById,
     AllPetId,
@@ -103,4 +121,8 @@ pub enum JoychiV1StorageKey {
     AllPetSpeciesId,
     PetSpeciesMetadataById,
     PetEvolutionMetadataById,
+    PoolMetadataById,
+    AllPoolId,
+    UserStakedPetCountOuter,
+    UserStakedPetCountInner { account_id: AccountId },
 }

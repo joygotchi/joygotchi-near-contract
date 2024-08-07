@@ -7,7 +7,7 @@ use super::ItemId;
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
-pub struct ItemMetadata {
+pub struct ItemImmidiateMetadata {
     pub item_id: ItemId,
     pub name: String,
     pub points: u128,
@@ -19,8 +19,8 @@ pub struct ItemMetadata {
     pub is_revival: bool,
 }
 
-pub trait ItemFeature {
-    fn create_item(
+pub trait ItemImmidiateFeature {
+    fn create_item_immidiate(
         &mut self,
         name: String,
         price: u128,
@@ -30,9 +30,9 @@ pub trait ItemFeature {
         stock: u128,
         shield: u128,
         is_revival: bool,
-    ) -> ItemMetadata;
+    ) -> ItemImmidiateMetadata;
 
-    fn edit_item(
+    fn edit_item_immidiate(
         &mut self,
         item_id: ItemId,
         name: String,
@@ -47,7 +47,11 @@ pub trait ItemFeature {
 }
 
 pub trait ItemEnum {
-    fn get_all_item_metadata(&self, start: Option<u32>, limit: Option<u32>) -> Vec<ItemMetadata>;
+    fn get_all_item_immidiate_metadata(
+        &self,
+        start: Option<u32>,
+        limit: Option<u32>,
+    ) -> Vec<ItemImmidiateMetadata>;
 
-    fn get_item_by_item_id(&self, item_id: ItemId) -> ItemMetadata;
+    fn get_item_immidiate_by_item_id(&self, item_id: ItemId) -> ItemImmidiateMetadata;
 }

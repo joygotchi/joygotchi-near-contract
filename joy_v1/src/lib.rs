@@ -11,20 +11,25 @@ pub mod models;
 #[near_bindgen]
 impl JoychiV1 {
     #[init]
-    pub fn init(nft_addr: AccountId, ft_addr: AccountId) -> Self {
+    pub fn init(nft_addr: AccountId, nft_item_addr: AccountId, ft_addr: AccountId) -> Self {
         let owner_id = env::signer_account_id();
 
-        Self::new(owner_id, nft_addr, ft_addr)
+        Self::new(owner_id, nft_addr, nft_item_addr, ft_addr)
     }
 
     #[init]
-    pub fn new(owner_id: AccountId, nft_addr: AccountId, ft_addr: AccountId) -> Self {
+    pub fn new(owner_id: AccountId, nft_addr: AccountId, nft_item_addr: AccountId, ft_addr: AccountId) -> Self {
         Self {
             owner_id,
             nft_address: nft_addr,
+            nft_item_address: nft_item_addr,
             manager_address: env::signer_account_id(),
             total_score: 0,
             ft_address: ft_addr,
+            all_item_immidiate_id: UnorderedSet::new(JoychiV1StorageKey::AllItemImmidiateId.try_to_vec().unwrap()),
+            item_immidiate_metadata_by_id: LookupMap::new(
+                JoychiV1StorageKey::ItemImmidiateMetadataById.try_to_vec().unwrap(),
+            ),
             all_item_id: UnorderedSet::new(JoychiV1StorageKey::AllItemId.try_to_vec().unwrap()),
             item_metadata_by_id: LookupMap::new(
                 JoychiV1StorageKey::ItemMetadataById.try_to_vec().unwrap(),
@@ -50,6 +55,14 @@ impl JoychiV1 {
                     .try_to_vec()
                     .unwrap(),
             ),
+            pool_metadata_by_id: LookupMap::new(
+                JoychiV1StorageKey::PoolMetadataById.try_to_vec().unwrap()
+            ),
+            all_pool_id: UnorderedSet::new(
+                JoychiV1StorageKey::AllPoolId.try_to_vec().unwrap(),
+            ),
+            user_staked_pet_count: LookupMap::new(JoychiV1StorageKey::UserStakedPetCountOuter.try_to_vec().unwrap()),
+
         }
     }
 }

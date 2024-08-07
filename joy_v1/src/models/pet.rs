@@ -7,7 +7,7 @@ use near_sdk::{
 
 use super::{
     contract::{BattleMetadata, Status},
-    item::ItemMetadata,
+    item_immidiate::ItemImmidiateMetadata,
     nft_request::external::PetAttribute,
     BattleId, ItemId, PetId, PetSpeciesId,
 };
@@ -20,7 +20,7 @@ pub struct PetMetadata {
     pub owner_id: AccountId,
     pub time_pet_born: u128,
     pub time_until_starving: u128,
-    pub items: Vec<ItemMetadata>,
+    pub items: Vec<ItemImmidiateMetadata>,
     pub score: u128,
     pub level: u128,
     pub status: Status,
@@ -36,6 +36,7 @@ pub struct PetMetadata {
     pub pet_evolution_phase: u128,
     pub extra_permission: Vec<AccountId>,
     pub category: String,
+    pub is_lock: bool,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -64,7 +65,7 @@ pub trait PetFeature {
 
     fn change_name_pet(&mut self, pet_id: PetId, name: String);
 
-    fn buy_item(&mut self, pet_id: PetId, item_id: ItemId);
+    fn buy_item_immidiate(&mut self, pet_id: PetId, item_id: ItemId);
 
     fn attack(&mut self, from_id: PetId, to_id: PetId) -> BattleMetadata;
 

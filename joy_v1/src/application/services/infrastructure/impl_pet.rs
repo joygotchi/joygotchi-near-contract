@@ -9,7 +9,7 @@ use crate::{
     models::{
         contract::{BattleMetadata, JoychiV1, JoychiV1Ext, Status},
         ft_request::external::cross_ft,
-        nft_request::external::{cross_nft, PetAttribute, TokenMetadata},
+        nft_request::external::{cross_pet_nft, PetAttribute, TokenMetadata},
         pet::{PetEnum, PetEvolution, PetFeature, PetMetadata, PetSpecies},
         ItemId, PetId,
     },
@@ -49,7 +49,7 @@ impl PetFeature for JoychiV1 {
             star: pet.star,
         };
 
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_medatada_pet(pet_id.to_string(), pet_attribute.clone());
 
@@ -61,7 +61,7 @@ impl PetFeature for JoychiV1 {
             self.check_role_update_pet(pet_id, env::signer_account_id()),
             "You're not permission"
         );
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_medatada_pet(pet_id.to_string(), pet_attribute);
     }
@@ -71,7 +71,7 @@ impl PetFeature for JoychiV1 {
             self.check_role_update_pet(pet_id, env::signer_account_id()),
             "You're not permission"
         );
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .update_token_metadata(pet_id.to_string(), token_metadata);
     }
@@ -117,6 +117,7 @@ impl PetFeature for JoychiV1 {
             pet_evolution_phase: 1,
             extra_permission: Vec::new(),
             category: pet_species.species_name,
+            is_lock: false,
         };
 
         let token_metadata = TokenMetadata {
@@ -143,7 +144,7 @@ impl PetFeature for JoychiV1 {
         self.pet_metadata_by_id.insert(&pet_id, &pet_metadata);
         self.all_pet_id.insert(&pet_id);
 
-        cross_nft::ext(self.nft_address.to_owned())
+        cross_pet_nft::ext(self.nft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
             .with_attached_deposit(ATTACHED_DEPOSIT_NFT)
             .nft_mint(
@@ -171,10 +172,10 @@ impl PetFeature for JoychiV1 {
         self.pet_metadata_by_id.insert(&pet_id, &pet);
     }
 
-    fn buy_item(&mut self, pet_id: PetId, item_id: ItemId) {
+    fn buy_item_immidiate(&mut self, pet_id: PetId, item_id: ItemId) {
         let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
 
-        let mut item = self.item_metadata_by_id.get(&item_id).unwrap();
+        let mut item = self.item_immidiate_metadata_by_id.get(&item_id).unwrap();
 
         assert!(
             pet.owner_id == env::signer_account_id(),
@@ -207,7 +208,7 @@ impl PetFeature for JoychiV1 {
         item.price += item.price_delta;
         item.stock -= 1;
 
-        self.item_metadata_by_id.insert(&item_id, &item);
+        self.item_immidiate_metadata_by_id.insert(&item_id, &item);
         self.pet_metadata_by_id.insert(&pet_id, &pet);
 
         cross_ft::ext(self.ft_address.to_owned())

@@ -11,7 +11,7 @@ use helpers::{
     TokenMetadata,
 };
 
-use crate::helpers::{get_item_metadata_by_id, JsonToken, PetAttribute, PetEvolution};
+use crate::helpers::{get_item_immidiate_metadata_by_id, JsonToken, PetAttribute, PetEvolution};
 
 const NFT_WASM_FILEPATH: &str = "../res/nft.wasm";
 const JOYCHI_WASM_FILEPATH: &str = "../res/joy_v1.wasm";
@@ -369,7 +369,7 @@ pub async fn test_buy_item(
     let level_before_buying_item = get_level_pet_by_id(user, 1, joychi_contract).await?;
     assert_eq!(level_before_buying_item, 1);
 
-    let stock_before_buying_item = get_item_metadata_by_id(user, 1, joychi_contract)
+    let stock_before_buying_item = get_item_immidiate_metadata_by_id(user, 1, joychi_contract)
         .await?
         .stock;
     assert_eq!(stock_before_buying_item, 5);
@@ -398,7 +398,7 @@ pub async fn test_buy_item(
     let level_after_buying_item = get_level_pet_by_id(user, 1, joychi_contract).await?;
     assert_eq!(level_after_buying_item, 2);
 
-    let stock_after_buying_item = get_item_metadata_by_id(user, 1, joychi_contract)
+    let stock_after_buying_item = get_item_immidiate_metadata_by_id(user, 1, joychi_contract)
         .await?
         .stock;
     assert_eq!(stock_after_buying_item, 4);
