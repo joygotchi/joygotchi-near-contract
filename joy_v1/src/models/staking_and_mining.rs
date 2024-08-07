@@ -1,5 +1,4 @@
 use near_sdk::{
-    store::vec, 
     AccountId,
     borsh::{self, BorshDeserialize, BorshSerialize},
     serde::{Deserialize, Serialize},

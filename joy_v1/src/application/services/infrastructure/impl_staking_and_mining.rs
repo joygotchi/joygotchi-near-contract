@@ -1,10 +1,10 @@
-use near_sdk::{collections::LookupMap, env, json_types::U128, near_bindgen, AccountId};
+use near_sdk::{collections::LookupMap, env, json_types::U128, near_bindgen};
 
 use crate::models::{
-    contract::{JoychiV1, JoychiV1Ext, JoychiV1StorageKey}, ft_request::external::cross_ft, item_factory::ItemFeature, pet::PetFeature, staking_and_mining::{NFTInfo, PetCountUser, PoolInfo, PoolMetadata, StakingAndMining}, PetId, PoolId
+    contract::{JoychiV1, JoychiV1Ext, JoychiV1StorageKey}, ft_request::external::cross_ft, item_factory::ItemFeature, pet::PetFeature, staking_and_mining::{NFTInfo, PoolInfo, PoolMetadata, StakingAndMining}, PetId, PoolId
 };
 
-use super::impl_pet::{ATTACHED_DEPOSIT_NFT, GAS_FOR_CROSS_CALL};
+use super::impl_pet::GAS_FOR_CROSS_CALL;
 
 #[near_bindgen]
 impl StakingAndMining for JoychiV1 {
@@ -79,7 +79,7 @@ impl StakingAndMining for JoychiV1 {
     }
     fn un_stake(&mut self, pet_id: PetId, pool_id: PoolId) {
         let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
-        let mut pool = self.pool_metadata_by_id.get(&pool_id).unwrap();
+        let pool = self.pool_metadata_by_id.get(&pool_id).unwrap();
         let account_id = env::signer_account_id();
         let mut is_staked_pet_owner = false;
         for owner in pool.staked_pets {

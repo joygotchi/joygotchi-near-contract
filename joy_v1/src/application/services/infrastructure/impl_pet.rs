@@ -90,7 +90,7 @@ impl PetFeature for JoychiV1 {
 
         let pet_species_id = random_in_range(1, self.all_pet_species_id.len() as i64);
 
-        let mut pet_species = self
+        let pet_species = self
             .pet_species_metadata_by_id
             .get(&pet_species_id)
             .unwrap();
@@ -423,7 +423,7 @@ impl PetFeature for JoychiV1 {
 
         let next_evol_phase = self.get_pet_evolution_phase(pet_id, current_phase);
 
-        if (current_phase < next_evol_phase) {
+        if current_phase < next_evol_phase {
             pet.pet_evolution_phase = next_evol_phase;
         }
 

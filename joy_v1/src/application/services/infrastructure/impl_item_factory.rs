@@ -3,7 +3,7 @@ use near_sdk::{env, near_bindgen, AccountId};
 use crate::models::{
     contract::{JoychiV1, JoychiV1Ext},
     item_factory::{ItemFeature, ItemMetadata, ItemRarity},
-    nft_request::external::{cross_item_nft, ItemAttribute, TokenMetadata},
+    nft_request::external::{cross_item_nft, TokenMetadata},
     ItemId,
 };
 
