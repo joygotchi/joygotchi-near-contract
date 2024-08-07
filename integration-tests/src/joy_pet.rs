@@ -13,7 +13,9 @@ use helpers::{
 
 use crate::helpers::{get_item_immidiate_metadata_by_id, JsonToken, PetAttribute, PetEvolution};
 
-const NFT_WASM_FILEPATH: &str = "../res/nft.wasm";
+const NFT_PET_WASM_FILEPATH: &str = "../res/nft_pet.wasm";
+
+const NFT_ITEM_WASM_FILEPATH: &str = "../res/nft_item.wasm";
 const JOYCHI_WASM_FILEPATH: &str = "../res/joy_v1.wasm";
 const FT_WASM_FILEPATH: &str = "../res/ft_token.wasm";
 
@@ -31,8 +33,12 @@ async fn main() -> anyhow::Result<()> {
     let ft_wasm = std::fs::read(FT_WASM_FILEPATH)?;
     let ft_contract = worker.dev_deploy(&ft_wasm).await?;
 
-    let nft_wasm = std::fs::read(NFT_WASM_FILEPATH)?;
-    let nft_contract = worker.dev_deploy(&nft_wasm).await?;
+    let nft_pet_wasm = std::fs::read(NFT_PET_WASM_FILEPATH)?;
+    let nft_pet_contract = worker.dev_deploy(&nft_pet_wasm).await?;
+
+    let nft_item_wasm = std::fs::read(NFT_ITEM_WASM_FILEPATH)?;
+    let nft_item_contract = worker.dev_deploy(&nft_item_wasm).await?;
+
     let joychi_wasm = std::fs::read(JOYCHI_WASM_FILEPATH)?;
     let joychi_contract = worker.dev_deploy(&joychi_wasm).await?;
 
@@ -45,12 +51,20 @@ async fn main() -> anyhow::Result<()> {
         .await?
         .into_result()?;
 
-    let owner_nft = owner
-        .create_subaccount("nft")
+    let owner_nft_pet = owner
+        .create_subaccount("nft_pet")
         .initial_balance(INITIAL_NEAR)
         .transact()
         .await?
         .into_result()?;
+
+    let owner_nft_item = owner
+        .create_subaccount("nft_item")
+        .initial_balance(INITIAL_NEAR)
+        .transact()
+        .await?
+        .into_result()?;
+
     let owner_joychi = owner
         .create_subaccount("joychi")
         .initial_balance(INITIAL_NEAR)
@@ -92,11 +106,21 @@ async fn main() -> anyhow::Result<()> {
         .await?
         .into_result()?;
 
-    // Call new construct for NFT
-    nft_contract
+    // Call new construct for NFT Pet
+    nft_pet_contract
         .call("new_default_meta")
         .args_json(json!({
-            "owner_id": owner_nft.id()
+            "owner_id": owner_nft_pet.id()
+        }))
+        .transact()
+        .await?
+        .into_result()?;
+
+    // Call new construct for NFT Item
+    nft_item_contract
+        .call("new_default_meta")
+        .args_json(json!({
+            "owner_id": owner_nft_item.id()
         }))
         .transact()
         .await?
@@ -106,7 +130,8 @@ async fn main() -> anyhow::Result<()> {
     owner_joychi
         .call(joychi_contract.id(), "init")
         .args_json(json!({
-            "nft_addr": nft_contract.id(),
+            "nft_addr": nft_pet_contract.id(),
+            "nft_item_addr": nft_item_contract.id(),
             "ft_addr": ft_contract.id()
         }))
         .transact()
@@ -124,7 +149,7 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
     // Create pet
-    test_create_pet(&alice, &joychi_contract, &ft_contract, &nft_contract).await?;
+    test_create_pet(&alice, &joychi_contract, &ft_contract, &nft_pet_contract).await?;
     // Change pet name
     test_change_name_pet(&alice, &joychi_contract).await?;
     // Create item then can buy item
@@ -135,8 +160,6 @@ async fn main() -> anyhow::Result<()> {
     // Create pet 2
     test_create_pet_2(&bob, &joychi_contract).await?;
 
-    // Test evolve
-    test_evolve(&alice, &joychi_contract).await?;
 
     // Attack
     test_attack(&bob, &joychi_contract).await?;
@@ -155,11 +178,11 @@ async fn main() -> anyhow::Result<()> {
         &delegate_user,
         &owner_joychi,
         &joychi_contract,
-        &nft_contract,
+        &nft_pet_contract,
     )
     .await?;
 
-    test_update_metadata_token(&alice, &delegate_user, &joychi_contract, &nft_contract).await?;
+    test_update_metadata_token(&alice, &delegate_user, &joychi_contract, &nft_pet_contract).await?;
 
     Ok(())
 }
@@ -198,21 +221,21 @@ pub async fn test_create_species(
     assert_eq!(user_balance, U128(parse_near!("10 N")));
     // define pet evolution
     let pet_evolution_1 = PetEvolution {
-        image: "abc.com".to_string(),
+        image: "evolution_1_image.com".to_string(),
         name: "Gold".to_string(),
         attack_win_rate: 5,
         next_evolution_level: 2,
     };
 
     let pet_evolution_2 = PetEvolution {
-        image: "abcd.com".to_string(),
+        image: "evolution_2_image.com".to_string(),
         name: "Platium".to_string(),
         attack_win_rate: 5,
         next_evolution_level: 3,
     };
 
     let pet_evolution_3 = PetEvolution {
-        image: "abcdef.com".to_string(),
+        image: "evolution_3_image.com".to_string(),
         name: "Titan".to_string(),
         attack_win_rate: 5,
         next_evolution_level: 4,
@@ -297,7 +320,7 @@ pub async fn test_create_pet(
         .json()?;
 
     assert_eq!(pet_attribute.pet_name, "Pet1".to_string());
-    assert_eq!(pet_attribute.image, "abc.com".to_string());
+    assert_eq!(pet_attribute.image, "evolution_1_image.com".to_string());
     assert_eq!(pet_attribute.score, 0);
     assert_eq!(pet_attribute.level, 1);
     assert_eq!(pet_attribute.status, Status::HAPPY);
@@ -348,7 +371,7 @@ pub async fn test_create_item(
     let shield = 10;
 
     owner_joychi
-        .call(joychi_contract.id(), "create_item")
+        .call(joychi_contract.id(), "create_item_immidiate")
         .args_json(json!({"name":name,"price":price, "points":points, "time_extension": time_extension, "price_delta": price_delta, "stock":stock, "shield": shield, "is_revival": true}))
         .transact()
         .await?
@@ -376,7 +399,7 @@ pub async fn test_buy_item(
 
     // buy item
 
-    user.call(joychi_contract.id(), "buy_item")
+    user.call(joychi_contract.id(), "buy_item_immidiate")
         .args_json(json!({ "pet_id": 1,"item_id": 1}))
         .transact()
         .await?
@@ -385,6 +408,7 @@ pub async fn test_buy_item(
     let score_after_buying_item = get_score_pet_by_id(user, 1, joychi_contract).await?;
 
     assert_eq!(score_after_buying_item, 100000000000000u128);
+    
 
     // Update level
     let new_level: u128 = user
@@ -459,16 +483,6 @@ pub async fn test_attack(user: &Account, joychi_contract: &Contract) -> anyhow::
     Ok(())
 }
 
-pub async fn test_evolve(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
-    user.call(joychi_contract.id(), "evolve")
-        .args_json(json!({ "pet_id": 1}))
-        .transact()
-        .await?
-        .into_result()?;
-
-    println!("      Passed ✅ test_evolve");
-    Ok(())
-}
 
 pub async fn test_redeem(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
     joychi_contract
@@ -499,6 +513,26 @@ pub async fn test_update_metadata_attribute(
     joychi_contract: &Contract,
     nft_contract: &Contract,
 ) -> anyhow::Result<()> {
+
+    let pet = get_pet_metadata_by_id(user,1, joychi_contract).await?;
+    let evol_phase_pet_now: usize = pet.pet_evolution_phase as usize;
+    println!("phase now:{}", evol_phase_pet_now);
+
+    // let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
+    // let pet_img: String = pet_evolution_by_id[evol_phase_pet_now - 1].image.clone();
+    let pet_evolution: PetEvolution = user
+        .call(joychi_contract.id(), "get_pet_evolution_phase")
+        .args_json(json!({
+            "pet_id": 1,
+            "current_evo_phase": 1 
+        }))
+        .gas(DEFAULT_GAS)
+        .transact()
+        .await?
+        .json()?;
+    
+    println!("Pet evolution:{:?}", pet_evolution);
+
     let pet_attribute: PetAttribute = user
         .call(joychi_contract.id(), "token_uri")
         .args_json(json!({"pet_id": 1}))
@@ -507,7 +541,7 @@ pub async fn test_update_metadata_attribute(
         .json()?;
 
     assert_eq!(pet_attribute.pet_name, "Pet1_New".to_string());
-    assert_eq!(pet_attribute.image, "abcd.com".to_string());
+    assert_eq!(pet_attribute.image, "evolution_2_image.com".to_string());
     assert_eq!(pet_attribute.score, 99999999999000);
     assert_eq!(pet_attribute.level, 2);
     assert_eq!(pet_attribute.status, Status::HAPPY);
@@ -520,7 +554,7 @@ pub async fn test_update_metadata_attribute(
         .json()?;
     assert_eq!(nft_metadata.token_id, "1");
     assert_eq!(nft_metadata.owner_id.as_str(), user.id().as_str());
-    assert_eq!(nft_metadata.metadata.media.unwrap(), "abcd.com".to_string());
+    assert_eq!(nft_metadata.metadata.media.unwrap(), "evolution_2_image.com".to_string());
 
     let current_level = get_level_pet_by_id(user, 1, joychi_contract).await?;
     assert_eq!(current_level, 2);

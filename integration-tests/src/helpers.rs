@@ -79,13 +79,15 @@ pub struct PetMetadata {
     pub reward_debt: u128,
     pub pet_species: u128,
     pub pet_shield: u128,
-    pub pet_evolution: Vec<PetEvolution>,
     pub last_attack_used: u128,
     pub last_attacked: u128,
     pub pet_evolution_item_id: u128,
     pub pet_need_evolution_item: bool,
     pub pet_has_evolution_item: bool,
     pub pet_evolution_phase: u128,
+    pub extra_permission: Vec<AccountId>,
+    pub category: String,
+    pub is_lock: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -154,7 +156,7 @@ pub async fn get_item_immidiate_metadata_by_id(
     joychi_contract: &Contract,
 ) -> anyhow::Result<ItemImmidiateMetadata> {
     let item: ItemImmidiateMetadata = user
-        .call(joychi_contract.id(), "get_item_immidiate_metadata_by_id")
+        .call(joychi_contract.id(), "get_item_immidiate_by_item_id")
         .args_json(json!({
             "item_id": item_id
         }))
