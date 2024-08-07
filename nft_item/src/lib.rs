@@ -64,9 +64,9 @@ impl Contract {
         Self::new(
             owner_id,
             NFTContractMetadata {
-                spec: "RaichiItem".to_string(),
-                name: "RaichiItem".to_string(),
-                symbol: "RaiItem".to_string(),
+                spec: "JoygotchiItem".to_string(),
+                name: "JoygotchiItem".to_string(),
+                symbol: "JoyItem".to_string(),
                 icon: None,
                 base_uri: None,
                 reference: None,
