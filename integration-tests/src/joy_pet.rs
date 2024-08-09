@@ -514,32 +514,14 @@ pub async fn test_update_metadata_attribute(
     nft_contract: &Contract,
 ) -> anyhow::Result<()> {
 
-    let pet = get_pet_metadata_by_id(user,1, joychi_contract).await?;
-    let evol_phase_pet_now: usize = pet.pet_evolution_phase as usize;
-    println!("phase now:{}", evol_phase_pet_now);
-
-    // let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
-    // let pet_img: String = pet_evolution_by_id[evol_phase_pet_now - 1].image.clone();
-    let pet_evolution: PetEvolution = user
-        .call(joychi_contract.id(), "get_pet_evolution_phase")
-        .args_json(json!({
-            "pet_id": 1,
-            "current_evo_phase": 1 
-        }))
-        .gas(DEFAULT_GAS)
-        .transact()
-        .await?
-        .json()?;
-    
-    println!("Pet evolution:{:?}", pet_evolution);
-
+    println!("GO to here:");
     let pet_attribute: PetAttribute = user
         .call(joychi_contract.id(), "token_uri")
         .args_json(json!({"pet_id": 1}))
         .transact()
         .await?
         .json()?;
-
+    println!("GO to here 2:");
     assert_eq!(pet_attribute.pet_name, "Pet1_New".to_string());
     assert_eq!(pet_attribute.image, "evolution_2_image.com".to_string());
     assert_eq!(pet_attribute.score, 99999999999000);

@@ -33,11 +33,11 @@ impl PetFeature for JoychiV1 {
 
     fn token_uri(&mut self, pet_id: PetId) -> PetAttribute {
         let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
-        let evol_phase_pet_now: usize = self.get_pet_evolution_phase(pet_id, pet.pet_evolution_phase);
+        let evol_phase_pet_now = self.get_pet_evolution_phase(pet_id, pet.pet_evolution_phase);
         self.check_evol_pet_if_needed(pet_id);
 
         let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
-        let pet_img: String = pet_evolution_by_id[evol_phase_pet_now - 1].image.clone();
+        let pet_img: String = pet_evolution_by_id[evol_phase_pet_now as usize - 1].image.clone();
 
         //assert!(self.check_role_update_pet(pet_id, env::signer_account_id()), "You're not permission");
 
