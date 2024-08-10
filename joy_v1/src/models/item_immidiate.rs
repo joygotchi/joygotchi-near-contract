@@ -46,7 +46,7 @@ pub trait ItemImmidiateFeature {
     );
 }
 
-pub trait ItemEnum {
+pub trait ItemImmidiateEnum {
     fn get_all_item_immidiate_metadata(
         &self,
         start: Option<u32>,

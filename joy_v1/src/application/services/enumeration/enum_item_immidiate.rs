@@ -2,12 +2,12 @@ use near_sdk::near_bindgen;
 
 use crate::models::{
     contract::{JoychiV1, JoychiV1Ext},
-    item_immidiate::{ItemEnum, ItemImmidiateMetadata},
+    item_immidiate::{ItemImmidiateEnum, ItemImmidiateMetadata},
     ItemId,
 };
 
 #[near_bindgen]
-impl ItemEnum for JoychiV1 {
+impl ItemImmidiateEnum for JoychiV1 {
     fn get_all_item_immidiate_metadata(
         &self,
         start: Option<u32>,
