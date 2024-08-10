@@ -187,16 +187,16 @@ async fn main() -> anyhow::Result<()> {
     test_redeem(&alice, &joychi_contract).await?;
 
     // Test update metadata attribute for level 2
-    // test_update_metadata_attribute(
-    //     &alice,
-    //     &delegate_user,
-    //     &owner_joychi,
-    //     &joychi_contract,
-    //     &nft_pet_contract,
-    // )
-    // .await?;
+    test_update_metadata_attribute(
+        &alice,
+        &delegate_user,
+        &owner_joychi,
+        &joychi_contract,
+        &nft_pet_contract,
+    )
+    .await?;
 
-    // test_update_metadata_token(&alice, &delegate_user, &joychi_contract, &nft_pet_contract).await?;
+    test_update_metadata_token(&alice, &delegate_user, &joychi_contract, &nft_pet_contract).await?;
 
     Ok(())
 }
@@ -650,14 +650,13 @@ pub async fn test_update_metadata_attribute(
     nft_contract: &Contract,
 ) -> anyhow::Result<()> {
 
-    println!("GO to here:");
     let pet_attribute: PetAttribute = user
         .call(joychi_contract.id(), "token_uri")
         .args_json(json!({"pet_id": 1}))
+        .gas(DEFAULT_GAS)
         .transact()
         .await?
         .json()?;
-    println!("GO to here 2:");
     assert_eq!(pet_attribute.pet_name, "Pet1_New".to_string());
     assert_eq!(pet_attribute.image, "evolution_2_image.com".to_string());
     assert_eq!(pet_attribute.score, 99999999999000);
@@ -667,6 +666,7 @@ pub async fn test_update_metadata_attribute(
     let nft_metadata: JsonToken = user
         .call(nft_contract.id(), "nft_token")
         .args_json(json!({"token_id": "1"}))
+        .gas(DEFAULT_GAS)
         .transact()
         .await?
         .json()?;
