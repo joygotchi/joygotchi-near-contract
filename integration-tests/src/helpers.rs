@@ -101,6 +101,31 @@ pub struct PetAttribute {
     pub star: u64,
 }
 
+#[derive(Deserialize, Serialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ItemMetadata {
+    pub item_id: ItemId,
+    pub item_rarity_amount: u128,
+    pub list_prototype_items_of_rarity: Vec<u128>,
+    pub prototype_item_image: String,
+    pub prototype_item_type: String,
+    pub prototype_item_cooldown_breed_time: u128,
+    pub prototype_item_reduce_breed_fee: u128,
+    pub prototype_item_points: u128,
+    pub prototype_item_rarity: ItemRarity,
+    pub prototype_itemmining_power: u128,
+    pub prototype_itemmining_charge_time: u128,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(crate = "near_sdk::serde")]
+pub enum ItemRarity {
+    Common,
+    Rare,
+    Legendary,
+    Epic,
+}
+
 pub async fn storage_deposit(
     owner: &Account,
     ft_contract: &Contract,
@@ -157,6 +182,23 @@ pub async fn get_item_immidiate_metadata_by_id(
 ) -> anyhow::Result<ItemImmidiateMetadata> {
     let item: ItemImmidiateMetadata = user
         .call(joychi_contract.id(), "get_item_immidiate_by_item_id")
+        .args_json(json!({
+            "item_id": item_id
+        }))
+        .transact()
+        .await?
+        .json()?;
+
+    Ok(item)
+}
+
+pub async fn get_item_prototype_metadata_by_id(
+    user: &Account,
+    item_id: ItemId,
+    joychi_contract: &Contract,
+) -> anyhow::Result<ItemMetadata> {
+    let item: ItemMetadata = user
+        .call(joychi_contract.id(), "get_item_by_item_id")
         .args_json(json!({
             "item_id": item_id
         }))
