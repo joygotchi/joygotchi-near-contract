@@ -5,6 +5,7 @@ use serde_json::json;
 mod helpers;
 use near_sdk::json_types::U128;
 use near_workspaces::{Account, Contract};
+use near_sdk::env;
 
 use helpers::{
     get_item_prototype_metadata_by_id, get_level_pet_by_id, get_pet_metadata_by_id, get_score_pet_by_id, storage_deposit, ItemRarity, Status, TokenMetadata
@@ -169,6 +170,14 @@ async fn main() -> anyhow::Result<()> {
     // Attack
     test_attack(&bob, &joychi_contract).await?;
 
+    // Create staking pool
+    test_create_pool(&owner_joychi, &joychi_contract).await?;
+
+    // stake pool
+    test_stake(&alice, &joychi_contract).await?;
+
+    // stake pool
+    test_unstake(&alice, &joychi_contract).await?;
     // Test kill pet
 
     test_kill_pet(&bob, &joychi_contract).await?;
@@ -545,6 +554,59 @@ pub async fn test_attack(user: &Account, joychi_contract: &Contract) -> anyhow::
     Ok(())
 }
 
+
+async fn test_create_pool(
+    owner_joychi: &Account,
+    joychi_contract: &Contract,
+) -> anyhow::Result<()> {
+
+    
+    let start_time = env::block_timestamp_ms();
+    let end_time = start_time + 100000000000;
+
+    owner_joychi
+        .call(joychi_contract.id(), "create_new_staking_pool")
+        .args_json(json!({"name": "Pool1", "reward_nft_ids": vec![1], "staking_start_time": start_time, "staking_end_time": end_time, "max_slot_in_pool":10, "token_reward_per_slot": 1, "max_slot_per_wallet": 10   }))
+        .transact()
+        .await?
+        .into_result()?;
+
+    println!("      Passed ✅ test_create_pool");
+    Ok(())
+}
+
+
+pub async fn test_stake(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
+
+
+    user.call(joychi_contract.id(), "stake")
+        .args_json(json!({ "pet_id": 1,"pool_id": 1}))
+        .transact()
+        .await?
+        .into_result()?;
+
+
+    println!("      Passed ✅ test_stake");
+
+    Ok(())
+}
+
+pub async fn test_unstake(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
+
+
+    let res = user.call(joychi_contract.id(), "un_stake")
+        .args_json(json!({ "pet_id": 1,"pool_id": 1}))
+        .gas(DEFAULT_GAS)
+        .deposit(NearToken::from_yoctonear(1))
+        .transact()
+        .await?
+        .into_result()?;
+
+    println!("Test res:{:?}", res);
+    println!("      Passed ✅ test_unstake");
+
+    Ok(())
+}
 
 pub async fn test_redeem(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
     joychi_contract
