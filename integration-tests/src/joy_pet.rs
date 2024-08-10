@@ -177,7 +177,7 @@ async fn main() -> anyhow::Result<()> {
     test_stake(&alice, &joychi_contract).await?;
 
     // stake pool
-    test_unstake(&alice, &joychi_contract).await?;
+    test_unstake(&alice, &joychi_contract, &owner_ft, &ft_contract).await?;
     // Test kill pet
 
     test_kill_pet(&bob, &joychi_contract).await?;
@@ -591,10 +591,23 @@ pub async fn test_stake(user: &Account, joychi_contract: &Contract) -> anyhow::R
     Ok(())
 }
 
-pub async fn test_unstake(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
+pub async fn test_unstake(user: &Account, joychi_contract: &Contract, owner_ft: &Account, ft_contract: &Contract) -> anyhow::Result<()> {
 
 
-    let res = user.call(joychi_contract.id(), "un_stake")
+    storage_deposit(owner_ft, ft_contract, joychi_contract.as_account()).await?;
+    
+    owner_ft
+        .call(ft_contract.id(), "ft_transfer")
+        .args_json(serde_json::json!({
+            "receiver_id": joychi_contract.id(),
+            "amount": U128(parse_near!("10,000 N"))
+        }))
+        .deposit(DEFAULT_DEPOSIT)
+        .transact()
+        .await?
+        .into_result()?;
+
+    user.call(joychi_contract.id(), "un_stake")
         .args_json(json!({ "pet_id": 1,"pool_id": 1}))
         .gas(DEFAULT_GAS)
         .deposit(NearToken::from_yoctonear(1))
@@ -602,7 +615,6 @@ pub async fn test_unstake(user: &Account, joychi_contract: &Contract) -> anyhow:
         .await?
         .into_result()?;
 
-    println!("Test res:{:?}", res);
     println!("      Passed ✅ test_unstake");
 
     Ok(())
