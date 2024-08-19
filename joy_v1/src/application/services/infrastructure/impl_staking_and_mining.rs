@@ -172,4 +172,88 @@ impl StakingAndMining for JoychiV1 {
         self.is_lock_item.insert(&tool_id, &false);
 
     }
+
+    fn mining(&mut self) {
+        let account_id = env::signer_account_id();
+        assert!(self.total_mining_power.get(&account_id).unwrap() > 0, "You do not have any mining tool");
+
+        let total_mining_charge_of_time = (1000 * self.total_mining_charge_time.get(&account_id).unwrap()) / 1000 as u128; // TODO
+
+        assert!(self.last_mining_time.get(&account_id).unwrap() + total_mining_charge_of_time > env::block_timestamp() as u128, "You need to wait for the mining tool to be charged");
+        self.last_mining_time.insert(&account_id, &(env::block_timestamp() as u128));
+
+        let total_points_mined = (1000 * self.total_mining_power.get(&account_id).unwrap()) / 1000 as u128;
+
+        self.mining_points.insert(&account_id, &(self.mining_points.get(&account_id).unwrap() + total_points_mined));
+    }
+
+    fn redemn_mining_points(&mut self) {
+        let account_id = env::signer_account_id();
+        let mut mining_points = self.mining_points.get(&account_id).unwrap();
+
+        assert!(mining_points > self.points_used_per_redemn, "You do not have enough mining point");
+        self.mining_points.insert(&account_id, &(mining_points - &self.points_used_per_redemn));
+
+        // Mint New Item TODO
+
+        cross_ft::ext(self.ft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .with_attached_deposit(ATTACHED_TRANSFER_FT)
+            .ft_transfer(account_id.clone(), U128::from(self.token_earned_per_redemn), None);
+
+    }
+
+    fn owner_withdraw_redundant_token(&mut self, pool_id: PoolId) {
+        let account_id = env::signer_account_id();
+        let mut pool = self.pool_metadata_by_id.get(&pool_id).unwrap();
+        assert!(pool.pool_info.staking_end_time < (env::block_timestamp() as u128),  "Staking pool has not ended yet");
+
+        let total_tokens_for_reward = pool.pool_info.token_reward_per_slot * pool.pool_info.max_slot_in_pool;
+        let token_distributed = pool.pool_info.token_reward_per_slot * pool.pool_info.total_staked_slot;
+
+        let redundant_token = total_tokens_for_reward - token_distributed;
+
+        cross_ft::ext(self.ft_address.to_owned())
+            .with_static_gas(GAS_FOR_CROSS_CALL)
+            .with_attached_deposit(ATTACHED_TRANSFER_FT)
+            .ft_transfer(account_id.clone(), U128::from(redundant_token), None);
+    }
+
+    fn configure_mining_pool(&mut self, name: String, mining_power_multiplier: u128, charge_of_time_multiplier: u128) {
+        self.mining_pool_name = name;
+        self.mining_power_multiplier = mining_power_multiplier;
+        self.charge_of_time_multiplier = charge_of_time_multiplier;
+    }
+
+    fn set_mining_points_used_per_redemn(&mut self, points: u128) {
+        self.points_used_per_redemn = points;
+    }
+
+    fn set_token_earned_per_redemn(&mut self, token: u128) {
+        self.token_earned_per_redemn = token;
+    }
+
+    fn set_price_per_slot(&mut self, price_per_slot: u128) {
+        self.price_per_slot = price_per_slot;
+    }
+
+    fn caculate_charge_of_time(&mut self, number_of_tools: u128) {
+        if number_of_tools == 1 {
+            // let charge_of_time = self.mining
+        }
+    }
+
+    fn remove_item_from_list_tool(&mut self, value: u128) {
+        let account_id = env::signer_account_id();
+        let mut user_list_mining_tool = self.mining_tool_used.get(&account_id).unwrap();
+        let last_tool = user_list_mining_tool.last().unwrap();
+
+        for i in 0..user_list_mining_tool.len() {
+            if user_list_mining_tool[i] == *last_tool {
+                    user_list_mining_tool.pop();
+                    self.mining_tool_used.insert(&account_id, &user_list_mining_tool);
+                    break;
+                }
+        }
+    }
 }

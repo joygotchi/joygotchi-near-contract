@@ -68,7 +68,13 @@ impl JoychiV1 {
             total_mining_charge_time: LookupMap::new(JoychiV1StorageKey::TotalMiningChargeTime.try_to_vec().unwrap()),
             last_mining_time: LookupMap::new(JoychiV1StorageKey::LastMiningTime.try_to_vec().unwrap()),
             mining_tool_used: LookupMap::new(JoychiV1StorageKey::MiningToolUsed.try_to_vec().unwrap()),
-            is_lock_item: LookupMap::new(JoychiV1StorageKey::IsItemLock.try_to_vec().unwrap())
+            is_lock_item: LookupMap::new(JoychiV1StorageKey::IsItemLock.try_to_vec().unwrap()),
+            mining_pool_name: "".to_string(),
+            mining_power_multiplier: 0,
+            charge_of_time_multiplier: 0,
+            points_used_per_redemn: 0,
+            token_earned_per_redemn: 0,
+            price_per_slot: 0,
         }
     }
 }

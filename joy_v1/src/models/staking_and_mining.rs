@@ -1,3 +1,4 @@
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::{
     AccountId,
     borsh::{self, BorshDeserialize, BorshSerialize},
@@ -49,4 +50,13 @@ pub trait StakingAndMining {
     fn un_stake(&mut self, nft_id: PetId, pool_id: PoolId);
     fn add_mining_tool(&mut self, tool_id: u64);
     fn remove_mining_tool(&mut self, tool_id: u64);
+    fn mining(&mut self);
+    fn redemn_mining_points(&mut self);
+    fn owner_withdraw_redundant_token(&mut self, pool_id: PoolId);
+    fn configure_mining_pool(&mut self, name: String, mining_power_multiplier: u128, charge_of_time_multiplier: u128);
+    fn set_mining_points_used_per_redemn(&mut self, points: u128);
+    fn set_token_earned_per_redemn(&mut self, token: u128);
+    fn set_price_per_slot(&mut self, price_per_slot: u128);
+    fn caculate_charge_of_time(&mut self, number_of_tools: u128);
+    fn remove_item_from_list_tool(&mut self, value: u128);
 }

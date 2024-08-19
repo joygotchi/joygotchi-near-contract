@@ -97,6 +97,17 @@ pub struct JoychiV1 {
 
     pub is_lock_item: LookupMap<ItemId, bool>,
 
+    pub mining_pool_name: String,
+
+    pub mining_power_multiplier: u128,
+
+    pub charge_of_time_multiplier: u128,
+
+    pub points_used_per_redemn: u128,
+
+    pub token_earned_per_redemn: u128,
+
+    pub price_per_slot: u128,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
