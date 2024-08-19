@@ -48,4 +48,5 @@ pub trait StakingAndMining {
     fn stake(&mut self, nft_id: PetId, pool_id: PoolId) -> PoolMetadata;
     fn un_stake(&mut self, nft_id: PetId, pool_id: PoolId);
     fn add_mining_tool(&mut self, tool_id: u64);
+    fn remove_mining_tool(&mut self, tool_id: u64);
 }
