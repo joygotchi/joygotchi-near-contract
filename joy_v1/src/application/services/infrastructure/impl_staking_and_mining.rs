@@ -3,6 +3,7 @@ use near_sdk::{collections::LookupMap, env, json_types::U128, near_bindgen};
 use crate::models::{
     contract::{JoychiV1, JoychiV1Ext, JoychiV1StorageKey}, ft_request::external::cross_ft, item_factory::{ItemFeature, ItemType}, pet::PetFeature, staking_and_mining::{NFTInfo, PoolInfo, PoolMetadata, StakingAndMining}, PetId, PoolId
 };
+pub const ATTACHED_TRANSFER_FT: u128 = 1;
 
 use super::impl_pet::GAS_FOR_CROSS_CALL;
 
@@ -73,10 +74,13 @@ impl StakingAndMining for JoychiV1 {
         pool.staked_pets.push(nft_info);
         
         self.pool_metadata_by_id.insert(&pool_id, &pool);
+        self.pet_metadata_by_id.insert(&pet_id, &pet);
         
         pool
 
     }
+    
+    #[payable]
     fn un_stake(&mut self, pet_id: PetId, pool_id: PoolId) {
         let mut pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
         let pool = self.pool_metadata_by_id.get(&pool_id).unwrap();
@@ -108,6 +112,7 @@ impl StakingAndMining for JoychiV1 {
 
         cross_ft::ext(self.ft_address.to_owned())
             .with_static_gas(GAS_FOR_CROSS_CALL)
+            .with_attached_deposit(ATTACHED_TRANSFER_FT)
             .ft_transfer(pet.owner_id.clone(), U128::from(pool.price_per_slot), None);
 
         self.pet_metadata_by_id.insert(&pet_id, &pet);
