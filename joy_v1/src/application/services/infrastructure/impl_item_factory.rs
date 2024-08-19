@@ -2,7 +2,7 @@ use near_sdk::{env, near_bindgen, AccountId};
 
 use crate::models::{
     contract::{JoychiV1, JoychiV1Ext},
-    item_factory::{ItemFeature, ItemMetadata, ItemRarity},
+    item_factory::{ItemFeature, ItemMetadata, ItemRarity, ItemType},
     nft_request::external::{cross_item_nft, TokenMetadata},
     ItemId,
 };
@@ -14,7 +14,7 @@ impl ItemFeature for JoychiV1 {
     fn create_item(
         &mut self,
         prototype_item_image: String,
-        prototype_item_type: String,
+        prototype_item_type: ItemType,
         prototype_item_cooldown_breed_time: u128,
         prototype_item_reduce_breed_fee: u128,
         prototype_item_points: u128,
@@ -84,9 +84,9 @@ impl ItemFeature for JoychiV1 {
         let item_metadata = self.item_metadata_by_id.get(&item_id).unwrap();
 
         let token_metadata = TokenMetadata {
-            title: Some(item_metadata.prototype_item_type.clone()),
+            title: Some(item_metadata.prototype_item_image.clone()),
             description: Some(format!(
-                "item_image:{}, item_type:{}, cooldown_breed_time:{}, reduce_breed_fee:{}, item_points:{:?}, item_rarity:{:?}, mining_power:{}, mining_charge_time:{}",
+                "item_image:{}, item_type:{:?}, cooldown_breed_time:{}, reduce_breed_fee:{}, item_points:{:?}, item_rarity:{:?}, mining_power:{}, mining_charge_time:{}",
                 item_metadata.prototype_item_image,
                 item_metadata.prototype_item_type,
                 item_metadata.prototype_item_cooldown_breed_time,

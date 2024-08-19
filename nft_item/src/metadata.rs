@@ -34,7 +34,7 @@ pub struct TokenMetadata {
 #[serde(crate = "near_sdk::serde")]
 pub struct ItemAttribute {
     pub item_image: String,
-    pub item_type: String,
+    pub item_type: ItemType,
     pub cooldown_breed_time: u128,
     pub reduce_breed_fee: u128,
     pub item_points: u128,
@@ -50,6 +50,14 @@ pub enum ItemRarity {
     Rare,
     Legendary,
     Epic,
+    MineTool
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub enum ItemType {
+    Normal,
+    MineTool,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]

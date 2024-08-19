@@ -83,6 +83,20 @@ pub struct JoychiV1 {
 
     pub user_staked_pet_count: LookupMap<AccountId, LookupMap<PoolId, u64>>,
 
+    pub mining_points: LookupMap<AccountId, u128>,
+
+    pub mining_tool_owner: LookupMap<ItemId, AccountId>,
+
+    pub total_mining_power: LookupMap<AccountId, u128>,
+
+    pub total_mining_charge_time: LookupMap<AccountId, u128>,
+
+    pub last_mining_time: LookupMap<AccountId, u128>, 
+
+    pub mining_tool_used: LookupMap<AccountId, Vec<u128>>,
+
+    pub is_lock_item: LookupMap<ItemId, bool>,
+
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -125,4 +139,11 @@ pub enum JoychiV1StorageKey {
     AllPoolId,
     UserStakedPetCountOuter,
     UserStakedPetCountInner { account_id: AccountId },
+    MiningPoints,
+    MiningToolOwner,
+    TotalMiningPower,
+    TotalMiningChargeTime,
+    LastMiningTime,
+    MiningToolUsed,
+    IsItemLock,
 }
