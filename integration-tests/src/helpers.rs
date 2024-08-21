@@ -108,7 +108,7 @@ pub struct ItemMetadata {
     pub item_rarity_amount: u128,
     pub list_prototype_items_of_rarity: Vec<u128>,
     pub prototype_item_image: String,
-    pub prototype_item_type: String,
+    pub prototype_item_type: ItemType,
     pub prototype_item_cooldown_breed_time: u128,
     pub prototype_item_reduce_breed_fee: u128,
     pub prototype_item_points: u128,
@@ -117,13 +117,21 @@ pub struct ItemMetadata {
     pub prototype_itemmining_charge_time: u128,
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub enum ItemRarity {
     Common,
     Rare,
     Legendary,
     Epic,
+    MineTool,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
+#[serde(crate = "near_sdk::serde")]
+pub enum ItemType {
+    Normal,
+    MineTool,
 }
 
 pub async fn storage_deposit(

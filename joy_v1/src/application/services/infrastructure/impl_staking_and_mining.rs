@@ -121,10 +121,10 @@ impl StakingAndMining for JoychiV1 {
 
     fn add_mining_tool(&mut self, tool_id: u64) {
         let item = self.item_metadata_by_id.get(&tool_id).unwrap();
-        let itemType = item.prototype_item_type;
+        let item_type = item.prototype_item_type;
         let account_id = env::signer_account_id();
         let mut mining_tool_used = self.mining_tool_used.get(&env::signer_account_id()).unwrap();
-        assert!(itemType == ItemType::MineTool, "This item is not a mining tool");
+        assert!(item_type == ItemType::MineTool, "This item is not a mining tool");
         assert!(mining_tool_used.len() < 3, "You have reached the maximum mining tool");
         assert!(self.mining_tool_owner.get(&tool_id).unwrap() != account_id, "Mining tool is already used");
         assert!(self.is_lock_item.get(&tool_id).unwrap() == false, "This tool is locked");

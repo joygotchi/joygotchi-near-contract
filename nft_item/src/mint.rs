@@ -40,7 +40,7 @@ impl Contract {
         let mut token = self.token_metadata_by_id.get(&token_id).unwrap();
 
         let data: String = format!(
-            "item_image:{}, item_type:{}, cooldown_breed_time:{}, reduce_breed_fee:{}, item_points:{}, item_rarity:{:?}, mining_power:{}, mining_charge_time:{}",
+            "item_image:{}, item_type:{:?}, cooldown_breed_time:{}, reduce_breed_fee:{}, item_points:{}, item_rarity:{:?}, mining_power:{}, mining_charge_time:{}",
             item_attribute.item_image,
             item_attribute.item_type,
             item_attribute.cooldown_breed_time,

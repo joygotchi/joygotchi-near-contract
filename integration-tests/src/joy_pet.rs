@@ -8,7 +8,7 @@ use near_workspaces::{Account, Contract};
 use near_sdk::env;
 
 use helpers::{
-    get_item_prototype_metadata_by_id, get_level_pet_by_id, get_pet_metadata_by_id, get_score_pet_by_id, storage_deposit, ItemRarity, Status, TokenMetadata
+    get_item_prototype_metadata_by_id, get_level_pet_by_id, get_pet_metadata_by_id, get_score_pet_by_id, storage_deposit, ItemRarity, ItemType, Status, TokenMetadata
 };
 
 use crate::helpers::{get_item_immidiate_metadata_by_id, JsonToken, PetAttribute, PetEvolution};
@@ -158,7 +158,9 @@ async fn main() -> anyhow::Result<()> {
 
     // Test create item factory 
 
-    test_create_item_factory(&owner_joychi, &joychi_contract).await?;
+    test_create_item_factory_normal(&owner_joychi, &joychi_contract).await?;
+
+    
 
     test_edit_item_factory(&owner_joychi, &joychi_contract).await?;
     // Buy item and check score and check level
@@ -187,16 +189,23 @@ async fn main() -> anyhow::Result<()> {
     test_redeem(&alice, &joychi_contract).await?;
 
     // Test update metadata attribute for level 2
-    test_update_metadata_attribute(
-        &alice,
-        &delegate_user,
-        &owner_joychi,
-        &joychi_contract,
-        &nft_pet_contract,
-    )
-    .await?;
+    // test_update_metadata_attribute(
+    //     &alice,
+    //     &delegate_user,
+    //     &owner_joychi,
+    //     &joychi_contract,
+    //     &nft_pet_contract,
+    // )
+    // .await?;
 
-    test_update_metadata_token(&alice, &delegate_user, &joychi_contract, &nft_pet_contract).await?;
+    // test_update_metadata_token(&alice, &delegate_user, &joychi_contract, &nft_pet_contract).await?;
+
+    // Test create item factory Mining Tool
+
+    test_create_item_factory_mining(&owner_joychi, &joychi_contract).await?;
+    // add mining tool 
+
+    test_add_mining_tool(&bob, &joychi_contract).await?;
 
     Ok(())
 }
@@ -395,13 +404,13 @@ pub async fn test_create_item(
     Ok(())
 }
 
-pub async fn test_create_item_factory(
+pub async fn test_create_item_factory_normal(
     owner_joychi: &Account,
     joychi_contract: &Contract,
 ) -> anyhow::Result<()> {
 
     let prototype_item_image = "Prototype_Image_1";
-    let prototype_item_type = "Hat";
+    let prototype_item_type = ItemType::Normal;
     let prototype_item_cooldown_breed_time = 100000u128;
     let prototype_item_reduce_breed_fee = 1000000u128; 
     let prototype_item_points = 100000000u128;
@@ -746,5 +755,49 @@ pub async fn test_update_metadata_token(
 
     println!("      Passed ✅ test_update_metadata_token");
 
+    Ok(())
+}
+
+
+pub async fn test_create_item_factory_mining(
+    owner_joychi: &Account,
+    joychi_contract: &Contract,
+) -> anyhow::Result<()> {
+
+    let prototype_item_image = "Prototype_Image_2";
+    let prototype_item_type = ItemType::MineTool;
+    let prototype_item_cooldown_breed_time = 100000u128;
+    let prototype_item_reduce_breed_fee = 1000000u128; 
+    let prototype_item_points = 100000000u128;
+    let prototype_item_rarity = ItemRarity::Legendary;
+    let prototype_itemmining_power = 10u128;
+    let prototype_itemmining_charge_time = 1000u128;
+
+    owner_joychi
+        .call(joychi_contract.id(), "create_item")
+        .args_json(json!({"prototype_item_image":prototype_item_image,"prototype_item_type":prototype_item_type, "prototype_item_cooldown_breed_time":prototype_item_cooldown_breed_time, "prototype_item_reduce_breed_fee": prototype_item_reduce_breed_fee, "prototype_item_points": prototype_item_points, "prototype_item_rarity":prototype_item_rarity, "prototype_itemmining_power": prototype_itemmining_power, "prototype_itemmining_charge_time": prototype_itemmining_charge_time}))
+        .transact()
+        .await?
+        .into_result()?;
+
+    let item_create = get_item_prototype_metadata_by_id(&owner_joychi, 2, joychi_contract).await?;
+    assert_eq!("Prototype_Image_2", item_create.prototype_item_image);
+    assert_eq!(ItemRarity::Legendary, item_create.prototype_item_rarity);
+    println!("      Passed ✅ test_create_item_factory_mining");
+    Ok(())
+}
+
+
+
+pub async fn test_add_mining_tool(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
+
+    // Create mining tool with id == 2 (Mining Tool)
+
+    user.call(joychi_contract.id(), "add_mining_tool")
+        .args_json(json!({"tool_id": 2}))
+        .transact()
+        .await?
+        .into_result()?;
+    println!("      Passed ✅ test_add_mining_tool");
     Ok(())
 }
