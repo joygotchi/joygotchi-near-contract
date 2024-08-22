@@ -44,7 +44,7 @@ pub struct PoolInfo {
     pub total_staked_slot: u128,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone, Default)]
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct MiningData {
     pub account_id: Option<AccountId>,

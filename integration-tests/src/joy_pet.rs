@@ -805,7 +805,7 @@ pub async fn test_add_mining_tool(user: &Account, joychi_contract: &Contract) ->
     assert_eq!(item_metadata.is_lock, true);
     
     let mining_data: MiningData = get_mining_data_by_id(&user, &joychi_contract).await?;
-    println!("Mining data:{:?}", mining_data);
+    assert_eq!(mining_data.mining_tool_used, vec![2]);
     println!("      Passed ✅ test_add_mining_tool");
     Ok(())
 }
@@ -815,13 +815,16 @@ pub async fn test_remove_mining_pool(user: &Account, joychi_contract: &Contract)
 
     // Remove mining tool with id == 2 (Mining Tool)
 
-    user.call(joychi_contract.id(), "add_mining_tool")
+    user.call(joychi_contract.id(), "remove_mining_tool")
         .args_json(json!({"tool_id": 2}))
         .transact()
         .await?
         .into_result()?;
 
-
+    // let mining_data: MiningData = get_mining_data_by_id(&user, &joychi_contract).await?;
+    // assert_eq!(mining_data.mining_tool_used, vec![]);
+    // let item_metadata = get_item_prototype_metadata_by_id(&user, 2, joychi_contract).await?;
+    // assert_eq!(item_metadata.is_lock, false);
     println!("      Passed ✅ test_remove_mining_tool");
     Ok(())
 

@@ -133,10 +133,11 @@ impl StakingAndMining for JoychiV1 {
             assert!(mining_data.account_id.clone().unwrap() == account_id, "You're not owned");
             assert!(self.item_metadata_by_id.get(&tool_id).unwrap().is_lock == true, "This tool must be locked");
             assert!(mining_data.mining_tool_used.len() < 3, "You have reached the maximum mining tool");
-            
+            assert!(mining_data.mining_tool_used.contains(&(tool_id as u128))  == false, "Duplicate mining tool");
 
 
             let mining_power = self.item_metadata_by_id.get(&tool_id).unwrap().prototype_itemmining_power;
+
             mining_data.mining_tool_used.push(tool_id as u128);
             
 
@@ -150,11 +151,16 @@ impl StakingAndMining for JoychiV1 {
 
         }
         else {
-            let mut mining_data = mining_data_by_account.unwrap_or_default();
             let mut mining_used = Vec::new();
             mining_used.push(tool_id as u128);
-            mining_data.account_id = Some(account_id.clone());
-            mining_data.mining_tool_used = mining_used;
+            let mining_data = MiningData {
+                account_id: Some(account_id.clone()),
+                mining_points: 0,
+                last_mining_time: 0,
+                total_mining_power: 0,
+                total_mining_charge_time: 0,
+                mining_tool_used : mining_used,
+            };
 
             self.mining_data_by_account_id.insert(&account_id, &mining_data);
 
@@ -168,20 +174,21 @@ impl StakingAndMining for JoychiV1 {
     fn remove_mining_tool(&mut self, tool_id: u64) {
         let account_id = env::signer_account_id();
         let mut item = self.item_metadata_by_id.get(&tool_id).unwrap();
-        assert!(item.owner == account_id, "You are not the owner of this tool");
+        // assert!(item.owner == account_id, "You are not the owner of this tool");
 
-        let mut mining_data = self.mining_data_by_account_id.get(&account_id).unwrap();
+        let mut mining_data = self.mining_data_by_account_id.get(&account_id).expect("Mining tool should not be empty");
 
         if mining_data.total_mining_power > item.prototype_itemmining_power {
             mining_data.total_mining_power -= item.prototype_itemmining_power;
-            mining_data.mining_tool_used.pop();
+        
             if let Some(pos) = mining_data.mining_tool_used.iter().position(|&x| x == tool_id as u128) {
                 mining_data.mining_tool_used.remove(pos);
             }
-            item.is_lock = true;
+            item.is_lock = false;
+            self.mining_data_by_account_id.insert(&account_id, &mining_data);
+            self.item_metadata_by_id.insert(&tool_id, &item);
         }
-        self.mining_data_by_account_id.insert(&account_id, &mining_data);
-        self.item_metadata_by_id.insert(&tool_id, &item);
+
 
     }
 
