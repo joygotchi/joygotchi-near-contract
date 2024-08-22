@@ -160,21 +160,17 @@ impl StakingAndMining for JoychiV1 {
 
     fn remove_mining_tool(&mut self, tool_id: u64) {
         let account_id = env::signer_account_id();
-        // let mut mining_tool_owner = self.mining_tool_owner.get(&tool_id).unwrap();
         let mut item = self.item_metadata_by_id.get(&tool_id).unwrap();
-        // assert!(mining_tool_owner == account_id, "You are not the owner of this tool");
+        assert!(item.owner == account_id, "You are not the owner of this tool");
 
         let mut total_mining_power = self.total_mining_power.get(&account_id).unwrap();
-        total_mining_power -= item.prototype_itemmining_power;
-        self.total_mining_power.insert(&account_id, &total_mining_power);
-
-        // let mut null_account = "null_account_joy_v2.testnet".to_string();
-        // mining_tool_owner = AccountId::try_from(null_account.clone()).expect("Invalid Account ID");
-
-        // removeItemFromListTool TODO
-        // calculate charge time TODO
-
-        // self.is_lock_item.insert(&tool_id, &false);
+        if total_mining_power > item.prototype_itemmining_power {
+            total_mining_power -= item.prototype_itemmining_power;
+            self.total_mining_power.insert(&account_id, &total_mining_power);
+            item.is_lock = true;
+        }
+       
+        self.item_metadata_by_id.insert(&tool_id, &item);
 
     }
 
