@@ -85,8 +85,6 @@ pub struct JoychiV1 {
 
     pub mining_points: LookupMap<AccountId, u128>,
 
-    pub mining_tool_owner: LookupMap<ItemId, AccountId>,
-
     pub total_mining_power: LookupMap<AccountId, u128>,
 
     pub total_mining_charge_time: LookupMap<AccountId, u128>,
@@ -94,8 +92,6 @@ pub struct JoychiV1 {
     pub last_mining_time: LookupMap<AccountId, u128>, 
 
     pub mining_tool_used: LookupMap<AccountId, Vec<u128>>,
-
-    pub is_lock_item: LookupMap<ItemId, bool>,
 
     pub mining_pool_name: String,
 

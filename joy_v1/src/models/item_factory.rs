@@ -20,6 +20,8 @@ pub struct ItemMetadata {
     pub prototype_item_rarity: ItemRarity,
     pub prototype_itemmining_power: u128,
     pub prototype_itemmining_charge_time: u128,
+    pub owner: AccountId,
+    pub is_lock: bool,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone, Debug)]

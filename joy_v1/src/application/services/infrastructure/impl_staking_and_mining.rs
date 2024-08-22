@@ -120,16 +120,18 @@ impl StakingAndMining for JoychiV1 {
     }
 
     fn add_mining_tool(&mut self, tool_id: u64) {
-        let item = self.item_metadata_by_id.get(&tool_id).unwrap();
-        let item_type = item.prototype_item_type;
+        let mut item = self.item_metadata_by_id.get(&tool_id).unwrap();
+        let item_type = item.prototype_item_type.clone();
         let account_id = env::signer_account_id();
         let mut mining_tool_used = self.mining_tool_used.get(&env::signer_account_id()).unwrap_or_default();
         assert!(item_type == ItemType::MineTool, "This item is not a mining tool");        
         
-        assert!(self.mining_tool_owner.get(&tool_id).unwrap() != account_id, "Mining tool is already used");
-        assert!(self.is_lock_item.get(&tool_id).unwrap() == false, "This tool is locked");
+        assert!(self.item_metadata_by_id.get(&tool_id).unwrap().owner != account_id, "Mining tool is already used");
+        assert!(self.item_metadata_by_id.get(&tool_id).unwrap().is_lock == false, "This tool is locked");
 
-        self.is_lock_item.insert(&tool_id, &true);
+        item.is_lock = true;
+
+        self.item_metadata_by_id.insert(&tool_id, &item.clone());
         let mining_power = self.item_metadata_by_id.get(&tool_id).unwrap().prototype_itemmining_power;
         
         if (mining_tool_used.is_empty()) {
@@ -147,37 +149,32 @@ impl StakingAndMining for JoychiV1 {
 
         self.total_mining_power.insert(&account_id, &(self.total_mining_power.get(&account_id).unwrap() + mining_power));
 
-        self.mining_tool_owner.insert(&tool_id, &account_id); 
-
         let mut last_time_mining = self.last_mining_time.get(&account_id).unwrap_or_default();
 
         if last_time_mining == 0 || self.mining_tool_used.get(&account_id).unwrap().len() == 1 {
             last_time_mining = env::block_timestamp() as u128;
             self.last_mining_time.insert(&account_id, &last_time_mining);
-
         }
-
 
     }
 
     fn remove_mining_tool(&mut self, tool_id: u64) {
         let account_id = env::signer_account_id();
-        let mut mining_tool_owner = self.mining_tool_owner.get(&tool_id).unwrap();
+        // let mut mining_tool_owner = self.mining_tool_owner.get(&tool_id).unwrap();
         let mut item = self.item_metadata_by_id.get(&tool_id).unwrap();
-        assert!(mining_tool_owner == account_id, "You are not the owner of this tool");
+        // assert!(mining_tool_owner == account_id, "You are not the owner of this tool");
 
         let mut total_mining_power = self.total_mining_power.get(&account_id).unwrap();
         total_mining_power -= item.prototype_itemmining_power;
         self.total_mining_power.insert(&account_id, &total_mining_power);
 
-        let mut null_account = "null_account_joy_v2.testnet".to_string();
-        mining_tool_owner = AccountId::try_from(null_account.clone()).expect("Invalid Account ID");
-        self.mining_tool_owner.insert(&tool_id, &mining_tool_owner);
+        // let mut null_account = "null_account_joy_v2.testnet".to_string();
+        // mining_tool_owner = AccountId::try_from(null_account.clone()).expect("Invalid Account ID");
 
         // removeItemFromListTool TODO
         // calculate charge time TODO
 
-        self.is_lock_item.insert(&tool_id, &false);
+        // self.is_lock_item.insert(&tool_id, &false);
 
     }
 

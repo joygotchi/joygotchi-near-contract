@@ -40,11 +40,15 @@ impl ItemFeature for JoychiV1 {
             prototype_item_rarity,
             prototype_itemmining_power,
             prototype_itemmining_charge_time,
+            owner: env::signer_account_id(),
+            is_lock: false,
         };
 
         self.item_metadata_by_id
             .insert(&(&num_item_id + 1), &item_metadata);
         self.all_item_id.insert(&(&num_item_id + 1));
+
+        // self.is_lock_item.insert(&(&num_item_id + 1), &false);
 
         item_metadata
     }
@@ -81,7 +85,7 @@ impl ItemFeature for JoychiV1 {
     }
 
     fn mint_item_for_user(&mut self, to_addr: AccountId, item_id: ItemId) {
-        let item_metadata = self.item_metadata_by_id.get(&item_id).unwrap();
+        let mut item_metadata = self.item_metadata_by_id.get(&item_id).unwrap();
 
         let token_metadata = TokenMetadata {
             title: Some(item_metadata.prototype_item_image.clone()),
@@ -116,6 +120,10 @@ impl ItemFeature for JoychiV1 {
             token_metadata,
             to_addr.clone(),
         );
+
+        item_metadata.owner = to_addr;
+        self.item_metadata_by_id.insert(&item_id, &item_metadata);
+
     }
 
 }
