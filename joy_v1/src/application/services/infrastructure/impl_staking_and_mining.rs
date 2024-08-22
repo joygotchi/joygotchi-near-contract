@@ -1,7 +1,7 @@
 use near_sdk::{collections::LookupMap, env, json_types::U128, near_bindgen, AccountId};
 
 use crate::models::{
-    contract::{JoychiV1, JoychiV1Ext, JoychiV1StorageKey}, ft_request::external::cross_ft, item_factory::{ItemFeature, ItemType}, pet::PetFeature, staking_and_mining::{NFTInfo, PoolInfo, PoolMetadata, StakingAndMining}, PetId, PoolId
+    contract::{JoychiV1, JoychiV1Ext, JoychiV1StorageKey}, ft_request::external::cross_ft, item_factory::{ItemFeature, ItemType}, pet::PetFeature, staking_and_mining::{MiningData, NFTInfo, PoolInfo, PoolMetadata, StakingAndMining}, PetId, PoolId
 };
 pub const ATTACHED_TRANSFER_FT: u128 = 1;
 
@@ -126,12 +126,14 @@ impl StakingAndMining for JoychiV1 {
         let item_type = item.prototype_item_type.clone();
         assert!(item_type == ItemType::MineTool, "This item is not a mining tool");        
 
-        let mut mining_data = self.mining_data_by_account_id.get(&account_id).unwrap_or_default();
-        if (mining_data.is_empty()) {
-            let mut mining_used = Vec::new();
-            mining_used.push(tool_id);
+        let mining_data_option = self.mining_data_by_account_id.get(&account_id);
+
+        let mut mining_data = mining_data_option.clone().unwrap_or_default();
+        if (mining_data_option.is_none()) {
+            let mut mining_used = Vec::new() as Vec<u128>;
+            mining_used.push(tool_id as u128);
             mining_data = MiningData {
-                account_id: account_id,
+                account_id: Some(account_id.clone()),
                 mining_points: 0,
                 total_mining_power: 0,
                 total_mining_charge_time: 0,
@@ -140,7 +142,7 @@ impl StakingAndMining for JoychiV1 {
             };
         } else {
 
-            assert!(mining_data.account_id != account_id, "You're not owned");
+            assert!(mining_data.account_id.clone().unwrap() != account_id, "You're not owned");
             assert!(self.item_metadata_by_id.get(&tool_id).unwrap().is_lock == false, "This tool is locked");
             assert!(mining_data.mining_tool_used.len() < 3, "You have reached the maximum mining tool");
             
@@ -173,7 +175,7 @@ impl StakingAndMining for JoychiV1 {
             mining_data.total_mining_power -= item.prototype_itemmining_power;
             mining_data.mining_tool_used.pop();
             if let Some(pos) = mining_data.mining_tool_used.iter().position(|&x| x == tool_id as u128) {
-                vec.remove(pos);
+                mining_data.mining_tool_used.remove(pos);
             }
             item.is_lock = true;
         }
@@ -261,7 +263,7 @@ impl StakingAndMining for JoychiV1 {
         let account_id = env::signer_account_id();
         let mut mining_data = self.mining_data_by_account_id.get(&account_id).unwrap();
 
-        let mut user_list_mining_tool = mining_data.mining_tool_used;
+        let mut user_list_mining_tool = mining_data.mining_tool_used.clone();
         let last_tool = user_list_mining_tool.last().unwrap();
 
         for i in 0..mining_data.mining_tool_used.len() {
