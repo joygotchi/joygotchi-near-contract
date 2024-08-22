@@ -139,6 +139,7 @@ impl StakingAndMining for JoychiV1 {
             self.mining_tool_used.insert(&account_id, &mining_tool_used);
             self.last_mining_time.insert(&account_id, &(0 as u128));
             self.total_mining_power.insert(&account_id, &(0 as u128));
+            self.total_mining_charge_time.insert(&account_id, &(0 as u128));
         } else {
             assert!(mining_tool_used.len() < 3, "You have reached the maximum mining tool");
             mining_tool_used.push(tool_id as u128);
@@ -183,7 +184,7 @@ impl StakingAndMining for JoychiV1 {
         assert!(self.last_mining_time.get(&account_id).unwrap() + total_mining_charge_of_time > env::block_timestamp() as u128, "You need to wait for the mining tool to be charged");
         self.last_mining_time.insert(&account_id, &(env::block_timestamp() as u128));
 
-        let total_points_mined = (1000 * self.total_mining_power.get(&account_id).unwrap()) / 1000 as u128;
+        let total_points_mined = (10000 * self.total_mining_power.get(&account_id).unwrap()) / 1000 as u128;
 
         self.mining_points.insert(&account_id, &(self.mining_points.get(&account_id).unwrap() + total_points_mined));
     }
