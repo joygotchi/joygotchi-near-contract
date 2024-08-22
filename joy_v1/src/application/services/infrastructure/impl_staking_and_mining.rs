@@ -123,32 +123,40 @@ impl StakingAndMining for JoychiV1 {
         let item = self.item_metadata_by_id.get(&tool_id).unwrap();
         let item_type = item.prototype_item_type;
         let account_id = env::signer_account_id();
-        let mut mining_tool_used = self.mining_tool_used.get(&env::signer_account_id()).unwrap();
-        assert!(item_type == ItemType::MineTool, "This item is not a mining tool");
-        assert!(mining_tool_used.len() < 3, "You have reached the maximum mining tool");
+        let mut mining_tool_used = self.mining_tool_used.get(&env::signer_account_id()).unwrap_or_default();
+        assert!(item_type == ItemType::MineTool, "This item is not a mining tool");        
+        
         assert!(self.mining_tool_owner.get(&tool_id).unwrap() != account_id, "Mining tool is already used");
         assert!(self.is_lock_item.get(&tool_id).unwrap() == false, "This tool is locked");
 
         self.is_lock_item.insert(&tool_id, &true);
         let mining_power = self.item_metadata_by_id.get(&tool_id).unwrap().prototype_itemmining_power;
         
-        mining_tool_used.push(tool_id as u128);
-        self.mining_tool_used.insert(&account_id, &mining_tool_used);
+        if (mining_tool_used.is_empty()) {
+            mining_tool_used.push(tool_id as u128);
+            self.mining_tool_used.insert(&account_id, &mining_tool_used);
+            self.last_mining_time.insert(&account_id, &(0 as u128));
+            self.total_mining_power.insert(&account_id, &(0 as u128));
+        } else {
+            assert!(mining_tool_used.len() < 3, "You have reached the maximum mining tool");
+            mining_tool_used.push(tool_id as u128);
+            self.mining_tool_used.insert(&account_id, &mining_tool_used);
+        }
 
         // total Mining charge time
 
-        let mut total_minging_power = self.total_mining_power.get(&account_id).unwrap();
-        total_minging_power += mining_power;
-        self.total_mining_power.insert(&account_id, &total_minging_power);
+        self.total_mining_power.insert(&account_id, &(self.total_mining_power.get(&account_id).unwrap() + mining_power));
 
-        let mut mining_tool_owner = self.mining_tool_owner.get(&tool_id).unwrap();
         self.mining_tool_owner.insert(&tool_id, &account_id); 
 
-        let mut last_time_mining = self.last_mining_time.get(&account_id).unwrap();
+        let mut last_time_mining = self.last_mining_time.get(&account_id).unwrap_or_default();
 
-        if last_time_mining == 0 || mining_tool_used.len() == 1 {
+        if last_time_mining == 0 || self.mining_tool_used.get(&account_id).unwrap().len() == 1 {
             last_time_mining = env::block_timestamp() as u128;
+            self.last_mining_time.insert(&account_id, &last_time_mining);
+
         }
+
 
     }
 
