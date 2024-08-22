@@ -71,3 +71,9 @@ pub trait StakingAndMining {
     fn caculate_charge_of_time(&mut self, number_of_tools: u128);
     fn remove_item_from_list_tool(&mut self, value: u128);
 }
+
+pub trait StakingAndMiningEnum {
+
+
+    fn get_mining_data_by_account_id(&self, account_id: AccountId) -> MiningData;
+}

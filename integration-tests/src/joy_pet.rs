@@ -8,7 +8,7 @@ use near_workspaces::{Account, Contract};
 use near_sdk::env;
 
 use helpers::{
-    get_item_prototype_metadata_by_id, get_level_pet_by_id, get_pet_metadata_by_id, get_score_pet_by_id, storage_deposit, ItemRarity, ItemType, Status, TokenMetadata
+    get_item_prototype_metadata_by_id, get_level_pet_by_id, get_mining_data_by_id, get_pet_metadata_by_id, get_score_pet_by_id, storage_deposit, ItemRarity, ItemType, MiningData, Status, TokenMetadata
 };
 
 use crate::helpers::{get_item_immidiate_metadata_by_id, JsonToken, PetAttribute, PetEvolution};
@@ -206,6 +206,8 @@ async fn main() -> anyhow::Result<()> {
     // add mining tool 
 
     test_add_mining_tool(&bob, &joychi_contract).await?;
+
+    test_remove_mining_pool(&bob, &joychi_contract).await?;
 
     Ok(())
 }
@@ -781,8 +783,9 @@ pub async fn test_create_item_factory_mining(
         .into_result()?;
 
     let item_create = get_item_prototype_metadata_by_id(&owner_joychi, 2, joychi_contract).await?;
-    assert_eq!("Prototype_Image_2", item_create.prototype_item_image);
-    assert_eq!(ItemRarity::Legendary, item_create.prototype_item_rarity);
+
+    assert_eq!(item_create.prototype_item_image, "Prototype_Image_2" );
+    assert_eq!(item_create.prototype_item_rarity, ItemRarity::Legendary);
     println!("      Passed ✅ test_create_item_factory_mining");
     Ok(())
 }
@@ -798,6 +801,28 @@ pub async fn test_add_mining_tool(user: &Account, joychi_contract: &Contract) ->
         .transact()
         .await?
         .into_result()?;
+    let item_metadata = get_item_prototype_metadata_by_id(&user, 2, joychi_contract).await?;
+    assert_eq!(item_metadata.is_lock, true);
+    
+    let mining_data: MiningData = get_mining_data_by_id(&user, &joychi_contract).await?;
+    println!("Mining data:{:?}", mining_data);
     println!("      Passed ✅ test_add_mining_tool");
     Ok(())
+}
+
+
+pub async fn test_remove_mining_pool(user: &Account, joychi_contract: &Contract) -> anyhow::Result<()> {
+
+    // Remove mining tool with id == 2 (Mining Tool)
+
+    user.call(joychi_contract.id(), "add_mining_tool")
+        .args_json(json!({"tool_id": 2}))
+        .transact()
+        .await?
+        .into_result()?;
+
+
+    println!("      Passed ✅ test_remove_mining_tool");
+    Ok(())
+
 }

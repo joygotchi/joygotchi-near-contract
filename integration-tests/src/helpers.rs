@@ -115,6 +115,8 @@ pub struct ItemMetadata {
     pub prototype_item_rarity: ItemRarity,
     pub prototype_itemmining_power: u128,
     pub prototype_itemmining_charge_time: u128,
+    pub owner: AccountId,
+    pub is_lock: bool,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
@@ -133,6 +135,19 @@ pub enum ItemType {
     Normal,
     MineTool,
 }
+
+
+#[derive(Deserialize, Serialize, Clone, Default, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub struct MiningData {
+    pub account_id: Option<AccountId>,
+    pub mining_points: u128,
+    pub total_mining_power: u128,
+    pub total_mining_charge_time: u128,
+    pub last_mining_time: u128,
+    pub mining_tool_used: Vec<u128>,
+}
+
 
 pub async fn storage_deposit(
     owner: &Account,
@@ -235,4 +250,21 @@ pub async fn get_level_pet_by_id(
     let pet = get_pet_metadata_by_id(user, pet_id, joychi_contract).await?;
 
     Ok(pet.level)
+}
+
+
+pub async fn get_mining_data_by_id(
+    user: &Account,
+    joychi_contract: &Contract,
+) -> anyhow::Result<MiningData> {
+    let pet: MiningData = user
+        .call(joychi_contract.id(), "get_mining_data_by_account_id")
+        .args_json(json!({
+            "account_id": user.id()
+        }))
+        .transact()
+        .await?
+        .json()?;
+
+    Ok(pet)
 }

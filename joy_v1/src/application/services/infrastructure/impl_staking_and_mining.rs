@@ -126,28 +126,15 @@ impl StakingAndMining for JoychiV1 {
         let item_type = item.prototype_item_type.clone();
         assert!(item_type == ItemType::MineTool, "This item is not a mining tool");        
 
-        let mining_data_option = self.mining_data_by_account_id.get(&account_id);
+        let mining_data_by_account = self.mining_data_by_account_id.get(&account_id);
 
-        let mut mining_data = mining_data_option.clone().unwrap_or_default();
-        if (mining_data_option.is_none()) {
-            let mut mining_used = Vec::new() as Vec<u128>;
-            mining_used.push(tool_id as u128);
-            mining_data = MiningData {
-                account_id: Some(account_id.clone()),
-                mining_points: 0,
-                total_mining_power: 0,
-                total_mining_charge_time: 0,
-                last_mining_time: 0,
-                mining_tool_used: mining_used,
-            };
-        } else {
 
-            assert!(mining_data.account_id.clone().unwrap() != account_id, "You're not owned");
-            assert!(self.item_metadata_by_id.get(&tool_id).unwrap().is_lock == false, "This tool is locked");
+        if let Some(mut mining_data) = mining_data_by_account {
+            assert!(mining_data.account_id.clone().unwrap() == account_id, "You're not owned");
+            assert!(self.item_metadata_by_id.get(&tool_id).unwrap().is_lock == true, "This tool must be locked");
             assert!(mining_data.mining_tool_used.len() < 3, "You have reached the maximum mining tool");
             
-            item.is_lock = true;
-            self.item_metadata_by_id.insert(&tool_id, &item.clone());
+
 
             let mining_power = self.item_metadata_by_id.get(&tool_id).unwrap().prototype_itemmining_power;
             mining_data.mining_tool_used.push(tool_id as u128);
@@ -158,9 +145,23 @@ impl StakingAndMining for JoychiV1 {
                 mining_data.last_mining_time += last_time_mining;
             }
             mining_data.total_mining_power += mining_power;
-        }
+            
+            self.mining_data_by_account_id.insert(&account_id, &mining_data);
 
-        self.mining_data_by_account_id.insert(&account_id, &mining_data);
+        }
+        else {
+            let mut mining_data = mining_data_by_account.unwrap_or_default();
+            let mut mining_used = Vec::new();
+            mining_used.push(tool_id as u128);
+            mining_data.account_id = Some(account_id.clone());
+            mining_data.mining_tool_used = mining_used;
+
+            self.mining_data_by_account_id.insert(&account_id, &mining_data);
+
+        }
+        item.is_lock = true;
+        self.item_metadata_by_id.insert(&tool_id, &item);
+
         
     }
 
