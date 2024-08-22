@@ -44,6 +44,17 @@ pub struct PoolInfo {
     pub total_staked_slot: u128,
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct MiningData {
+    pub account_id: AccountId,
+    pub mining_points: u128,
+    pub total_mining_power: u128,
+    pub total_mining_charge_time: u128,
+    pub last_mining_time: u128,
+    pub mining_tool_used: Vec<u128>,
+}
+
 pub trait StakingAndMining {
     fn create_new_staking_pool(&mut self, name: String, reward_nft_ids: Vec<u128>, staking_start_time: u128, staking_end_time: u128, max_slot_in_pool: u128, token_reward_per_slot: u128, max_slot_per_wallet: u128) -> PoolMetadata;
     fn stake(&mut self, nft_id: PetId, pool_id: PoolId) -> PoolMetadata;
