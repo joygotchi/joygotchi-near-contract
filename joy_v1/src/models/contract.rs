@@ -10,7 +10,7 @@ use near_sdk::{
 
 use super::item_factory::ItemMetadata;
 use super::pet::{PetEvolution, PetSpecies};
-use super::staking_and_mining::PoolMetadata;
+use super::staking_and_mining::{MiningData, PoolMetadata};
 use super::{PetSpeciesId, PoolId};
 use super::{item_immidiate::ItemImmidiateMetadata, pet::PetMetadata, BattleId, ItemId, PetId};
 
@@ -83,6 +83,19 @@ pub struct JoychiV1 {
 
     pub user_staked_pet_count: LookupMap<AccountId, LookupMap<PoolId, u64>>,
 
+    pub mining_data_by_account_id: LookupMap<AccountId, MiningData>,
+
+    pub mining_pool_name: String,
+
+    pub mining_power_multiplier: u128,
+
+    pub charge_of_time_multiplier: u128,
+
+    pub points_used_per_redemn: u128,
+
+    pub token_earned_per_redemn: u128,
+
+    pub price_per_slot: u128,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
@@ -125,4 +138,12 @@ pub enum JoychiV1StorageKey {
     AllPoolId,
     UserStakedPetCountOuter,
     UserStakedPetCountInner { account_id: AccountId },
+    MiningPoints,
+    MiningToolOwner,
+    TotalMiningPower,
+    TotalMiningChargeTime,
+    LastMiningTime,
+    MiningToolUsed,
+    IsItemLock,
+    MiningDataByAccountId
 }

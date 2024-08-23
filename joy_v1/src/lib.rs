@@ -62,7 +62,13 @@ impl JoychiV1 {
                 JoychiV1StorageKey::AllPoolId.try_to_vec().unwrap(),
             ),
             user_staked_pet_count: LookupMap::new(JoychiV1StorageKey::UserStakedPetCountOuter.try_to_vec().unwrap()),
-
+            mining_data_by_account_id: LookupMap::new(JoychiV1StorageKey::MiningDataByAccountId.try_to_vec().unwrap()),
+            mining_pool_name: "".to_string(),
+            mining_power_multiplier: 0,
+            charge_of_time_multiplier: 0,
+            points_used_per_redemn: 0,
+            token_earned_per_redemn: 0,
+            price_per_slot: 0,
         }
     }
 }

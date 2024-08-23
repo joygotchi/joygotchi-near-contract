@@ -4,7 +4,7 @@ use crate::{
     application::repository::HOUR,
     models::{
         contract::{BattleMetadata, JoychiV1, JoychiV1Ext, Status},
-        pet::{self, PetEnum, PetEvolution, PetMetadata},
+        pet::{PetEnum, PetEvolution, PetMetadata},
         BattleId, PetId,
     },
 };
@@ -101,7 +101,7 @@ impl PetEnum for JoychiV1 {
         let pet_evolution = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
 
         let evol_level = pet_evolution[evol_phase_pet_now - 1].next_evolution_level;
-        if (pet.level >= evol_level) {
+        if pet.level >= evol_level {
             return self.get_pet_evolution_phase(pet_id, current_evo_phase + 1);
         }
         return current_evo_phase;

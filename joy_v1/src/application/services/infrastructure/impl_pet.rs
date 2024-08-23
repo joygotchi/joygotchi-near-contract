@@ -33,10 +33,11 @@ impl PetFeature for JoychiV1 {
 
     fn token_uri(&mut self, pet_id: PetId) -> PetAttribute {
         let pet = self.pet_metadata_by_id.get(&pet_id).unwrap();
-        let evol_phase_pet_now: usize = pet.pet_evolution_phase as usize;
+        let evol_phase_pet_now = self.get_pet_evolution_phase(pet_id, pet.pet_evolution_phase);
+        self.check_evol_pet_if_needed(pet_id);
 
         let pet_evolution_by_id = self.pet_evolution_metadata_by_id.get(&pet_id).unwrap();
-        let pet_img: String = pet_evolution_by_id[evol_phase_pet_now - 1].image.clone();
+        let pet_img: String = pet_evolution_by_id[evol_phase_pet_now as usize - 1].image.clone();
 
         //assert!(self.check_role_update_pet(pet_id, env::signer_account_id()), "You're not permission");
 
@@ -90,7 +91,7 @@ impl PetFeature for JoychiV1 {
 
         let pet_species_id = random_in_range(1, self.all_pet_species_id.len() as i64);
 
-        let mut pet_species = self
+        let pet_species = self
             .pet_species_metadata_by_id
             .get(&pet_species_id)
             .unwrap();
@@ -423,7 +424,7 @@ impl PetFeature for JoychiV1 {
 
         let next_evol_phase = self.get_pet_evolution_phase(pet_id, current_phase);
 
-        if (current_phase < next_evol_phase) {
+        if current_phase < next_evol_phase {
             pet.pet_evolution_phase = next_evol_phase;
         }
 
