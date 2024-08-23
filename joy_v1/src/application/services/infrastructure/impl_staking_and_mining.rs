@@ -166,6 +166,7 @@ impl StakingAndMining for JoychiV1 {
 
         }
         item.is_lock = true;
+        item.owner = account_id;
         self.item_metadata_by_id.insert(&tool_id, &item);
 
         
@@ -174,7 +175,7 @@ impl StakingAndMining for JoychiV1 {
     fn remove_mining_tool(&mut self, tool_id: u64) {
         let account_id = env::signer_account_id();
         let mut item = self.item_metadata_by_id.get(&tool_id).unwrap();
-        // assert!(item.owner == account_id, "You are not the owner of this tool");
+        assert!(item.owner == account_id, "You are not the owner of this tool");
 
         let mut mining_data = self.mining_data_by_account_id.get(&account_id).expect("Mining tool should not be empty");
 
